@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git & GitHub Profissional — Projeto ODS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D1117; --surface: #161B22; --surface-2: #21262D;
+  --border: #30363D; --text: #E6EDF3; --muted: #8B949E;
+  --green: #3FB950; --blue: #58A6FF; --orange: #F0883E;
+  --yellow: #D29922; --red: #F85149; --purple: #BC8CFF;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+/* ── Header ── */
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 48px; border-bottom:1px solid var(--border);
+  position:sticky; top:0; background:rgba(13,17,23,0.92);
+  backdrop-filter:blur(12px); z-index:50;
+}
+.logo {
+  font-family:'JetBrains Mono',monospace; font-size:14px;
+  color:var(--green); letter-spacing:0.04em;
+}
+.ods-badge {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(63,185,80,0.1); border:1px solid rgba(63,185,80,0.3);
+  border-radius:20px; padding:6px 16px;
+  font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--green);
+}
+
+/* ── Hero ── */
+.hero { padding:72px 48px 56px; max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.hero-left {}
+.hero-eyebrow {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.12em; color:var(--green);
+  margin-bottom:16px; display:flex; align-items:center; gap:8px;
+}
+.hero-eyebrow::before { content:''; width:20px; height:1px; background:var(--green); }
+h1 {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(32px,4vw,52px); font-weight:700;
+  line-height:1.15; margin-bottom:20px;
+}
+h1 em { color:var(--green); font-style:normal; }
+.hero-desc { font-size:16px; color:var(--muted); line-height:1.7; max-width:480px; }
+.hero-desc strong { color:var(--text); }
+
+/* ── Git tree visual ── */
+.tree-wrap {
+  background:#010409; border:1px solid var(--border); border-radius:12px;
+  padding:28px 32px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:2;
+  position:relative; overflow:hidden;
+}
+.tree-wrap::before {
+  content:'git log --graph --oneline';
+  display:block; font-size:11px; color:var(--muted);
+  margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.tg { color:var(--green); }
+.tb { color:var(--blue); }
+.to { color:var(--orange); }
+.tp { color:var(--purple); }
+.tm { color:var(--muted); }
+
+/* ── Lessons grid ── */
+.lessons-section { max-width:1200px; margin:0 auto; padding:0 48px 72px; }
+.section-label {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--muted); text-transform:uppercase; letter-spacing:0.12em;
+  margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.lessons-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; }
+
+/* ── Lesson card ── */
+.lesson-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:28px; display:flex; flex-direction:column; gap:16px;
+  text-decoration:none; color:inherit;
+  transition:border-color .2s, transform .2s, box-shadow .2s;
+  position:relative; overflow:hidden;
+}
+.lesson-card:not(.locked):hover {
+  border-color:var(--green); transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(63,185,80,0.12);
+}
+.lesson-card.l2:not(.locked):hover { border-color:var(--blue); box-shadow:0 8px 32px rgba(88,166,255,0.12); }
+.lesson-card.l3:not(.locked):hover { border-color:var(--purple); box-shadow:0 8px 32px rgba(188,140,255,0.12); }
+
+.card-num {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--green); text-transform:uppercase; letter-spacing:0.1em;
+}
+.l2 .card-num { color:var(--blue); }
+.l3 .card-num { color:var(--purple); }
+
+.card-title {
+  font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:700;
+  line-height:1.3; color:var(--text);
+}
+.card-topics { display:flex; flex-direction:column; gap:6px; flex:1; }
+.card-topic {
+  display:flex; align-items:center; gap:8px;
+  font-size:13px; color:var(--muted);
+}
+.card-topic::before { content:'▸'; color:var(--green); font-size:10px; }
+.l2 .card-topic::before { color:var(--blue); }
+.l3 .card-topic::before { color:var(--purple); }
+
+.card-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:4px; padding-top:16px; border-top:1px solid var(--border);
+}
+.card-time { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+.card-cta {
+  display:flex; align-items:center; gap:6px;
+  font-size:13px; font-weight:600; color:var(--green);
+  font-family:'JetBrains Mono',monospace;
+}
+.l2 .card-cta { color:var(--blue); }
+.l3 .card-cta { color:var(--purple); }
+
+/* ── Locked card ── */
+.lesson-card.locked { opacity:0.5; cursor:not-allowed; }
+.lock-badge {
+  position:absolute; top:20px; right:20px;
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:6px; padding:4px 10px;
+  font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--muted);
+}
+
+/* ── Extra card (exercises) ── */
+.lesson-card.exercises { border-color:rgba(210,153,34,0.3); }
+.lesson-card.exercises:hover { border-color:var(--yellow); box-shadow:0 8px 32px rgba(210,153,34,0.12); }
+.exercises .card-num { color:var(--yellow); }
+.exercises .card-topic::before { color:var(--yellow); }
+.exercises .card-cta { color:var(--yellow); }
+
+/* ── Footer ── */
+footer {
+  border-top:1px solid var(--border); padding:24px 48px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.footer-text { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+.footer-link { color:var(--green); text-decoration:none; }
+
+@media(max-width:768px) {
+  header, .hero, .lessons-section, footer { padding-left:20px; padding-right:20px; }
+  .hero { grid-template-columns:1fr; gap:32px; padding-top:40px; }
+  .tree-wrap { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">// git &amp; github profissional</div>
+  <div class="ods-badge">🌱 Projeto ODS</div>
+</header>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">ADS 1º Ano · Material Didático</div>
+    <h1>Colabore como um<br><em>profissional</em></h1>
+    <p class="hero-desc">
+      Três aulas de 30 minutos para dominar <strong>Git e GitHub</strong> no contexto do seu projeto interdisciplinar vinculado às <strong>ODS da ONU</strong>.
+    </p>
+  </div>
+  <div class="tree-wrap">
+    <div><span class="tg">*</span> <span class="tm">c3f9a1b</span> <span class="tb">(HEAD → main)</span> <span class="tm">feat: página de metas ODS</span></div>
+    <div><span class="tg">*</span> <span class="tm">8d2e104</span> <span class="tm">fix(api): corrige cálculo de impacto</span></div>
+    <div><span class="tg">|</span> <span class="to">*</span> <span class="tm">5a7b3c9</span> <span class="to">(feature/mapa-ods)</span> <span class="tm">feat: mapa interativo</span></div>
+    <div><span class="tg">|</span> <span class="to">*</span> <span class="tm">2f1d8e6</span> <span class="tm">style: ajusta cores do mapa</span></div>
+    <div><span class="tg">|</span><span class="tg">/</span></div>
+    <div><span class="tg">*</span>   <span class="tm">9e4c2a7</span> <span class="tp">(feature/auth)</span> <span class="tm">feat(auth): login com JWT</span></div>
+    <div><span class="tg">|\</span></div>
+    <div><span class="tg">|</span> <span class="tp">*</span> <span class="tm">1b6d3f9</span> <span class="tm">fix(auth): valida token expirado</span></div>
+    <div><span class="tg">|</span><span class="tg">/</span></div>
+    <div><span class="tg">*</span> <span class="tm">0c5a8d2</span> <span class="tm">chore: setup inicial do projeto</span></div>
+    <div><span class="tg">*</span> <span class="tm">7f2b4e1</span> <span class="tm">docs: adiciona README</span></div>
+  </div>
+</section>
+
+<section class="lessons-section">
+  <div class="section-label">Selecione uma aula para começar</div>
+  <div class="lessons-grid">
+
+    <a class="lesson-card l1" href="aula-01.html">
+      <div class="card-num">Aula 01</div>
+      <div class="card-title">Controlando o Tempo do Seu Código</div>
+      <div class="card-topics">
+        <div class="card-topic">Os 3 estados do Git</div>
+        <div class="card-topic">git add &amp; git commit</div>
+        <div class="card-topic">Commits Semânticos</div>
+        <div class="card-topic">git restore &amp; git reset</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-time">⏱ 30 min</div>
+        <div class="card-cta">Acessar →</div>
+      </div>
+    </a>
+
+    <a class="lesson-card l2" href="aula-02.html">
+      <div class="card-num">Aula 02</div>
+      <div class="card-title">Branches: Desenvolvendo em Paralelo</div>
+      <div class="card-topics">
+        <div class="card-topic">O que são branches</div>
+        <div class="card-topic">git branch &amp; git switch</div>
+        <div class="card-topic">Feature branch flow</div>
+        <div class="card-topic">git merge &amp; conflitos</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-time">⏱ 30 min</div>
+        <div class="card-cta">Acessar →</div>
+      </div>
+    </a>
+
+    <a class="lesson-card l3" href="aula-03.html">
+      <div class="card-num">Aula 03</div>
+      <div class="card-title">GitHub: Colaboração Profissional</div>
+      <div class="card-topics">
+        <div class="card-topic">git remote, push, fetch, pull</div>
+        <div class="card-topic">Pull Requests completo</div>
+        <div class="card-topic">Templates de PR</div>
+        <div class="card-topic">Intro a GitHub Actions</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-time">⏱ 30 min</div>
+        <div class="card-cta">Acessar →</div>
+      </div>
+    </a>
+
+    <a class="lesson-card locked" href="#">
+      <span class="lock-badge">🔒 Em breve</span>
+      <div class="card-num">Aula 04</div>
+      <div class="card-title">Org GitHub do Projeto ODS</div>
+      <div class="card-topics">
+        <div class="card-topic">Organização do 2º Ano</div>
+        <div class="card-topic">Workflow de PRs da org</div>
+        <div class="card-topic">Templates específicos</div>
+        <div class="card-topic">Repositório e documentação</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-time">⏱ 30 min</div>
+      </div>
+    </a>
+
+    <a class="lesson-card exercises" href="exercicios.html" style="grid-column:span 2;">
+      <div class="card-num">📓 Caderno de Exercícios</div>
+      <div class="card-title">Exercícios + Desafio Final</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;">
+        <div class="card-topic">Aula 1 · Fácil / Médio / Difícil</div>
+        <div class="card-topic">Aula 2 · Fácil / Médio / Difícil</div>
+        <div class="card-topic">Aula 3 + Desafio Final Completo</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-time">Exercícios práticos para fixação</div>
+        <div class="card-cta">Abrir Caderno →</div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<footer>
+  <span class="footer-text">ADS · 1º Ano · Git &amp; GitHub Profissional</span>
+  <span class="footer-text">Projeto Interdisciplinar · <a class="footer-link" href="https://sdgs.un.org/goals" target="_blank">ODS ONU</a></span>
+</footer>
+
+</body>
+</html>

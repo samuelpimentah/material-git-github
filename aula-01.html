@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Aula 01 — Git: Controlando o Tempo do Seu Código</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1117;--sf:#161B22;--sf2:#21262D;--bd:#30363D;--tx:#E6EDF3;--mu:#8B949E;
+  --ac:#3FB950;--bl:#58A6FF;--or:#F0883E;--yw:#D29922;--rd:#F85149;--pu:#BC8CFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;}
+
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--ac);transition:width .4s ease;z-index:200;}
+#back{position:fixed;top:18px;left:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--mu);text-decoration:none;padding:6px 12px;border-radius:6px;transition:.2s;border:1px solid transparent;}
+#back:hover{color:var(--tx);background:var(--sf2);border-color:var(--bd);}
+#badge{position:fixed;top:18px;right:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--ac);background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:5px 12px;}
+
+/* ── Slides ── */
+#deck{width:100%;height:100%;position:relative;}
+.s{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:64px 80px 88px;}
+.s.on{display:flex;animation:fi .35s ease;}
+@keyframes fi{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+.s.back{animation:fb .35s ease;}
+
+/* ── Nav ── */
+#nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;z-index:200;}
+.nb{width:40px;height:40px;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);
+  color:var(--tx);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.nb:hover:not(:disabled){background:var(--bd);border-color:var(--ac);}
+.nb:disabled{opacity:.3;cursor:default;}
+#ctr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);min-width:52px;text-align:center;}
+.kbhint{position:fixed;bottom:28px;right:28px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mu);opacity:.45;}
+kbd{background:var(--sf2);border:1px solid var(--bd);border-radius:3px;padding:1px 5px;}
+
+/* ── Typography ── */
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--ac);margin-bottom:12px;}
+h1.big{font-family:'JetBrains Mono',monospace;font-size:clamp(30px,4vw,52px);font-weight:700;line-height:1.15;margin-bottom:20px;}
+h1.big .ac{color:var(--ac);}
+h2.sh{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,2.8vw,34px);font-weight:700;margin-bottom:28px;}
+h2.sh .ac{color:var(--ac);}h2.sh .bl{color:var(--bl);}
+
+/* ── Content wrappers ── */
+.content{flex-direction:column;align-items:flex-start;width:100%;max-width:900px;}
+.wide{max-width:1080px;}
+.subtitle{font-size:17px;color:var(--mu);max-width:560px;line-height:1.7;margin-bottom:32px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:36px;width:100%;align-items:start;}
+.lead{font-size:15px;color:var(--mu);line-height:1.7;margin-bottom:18px;}
+.lead strong{color:var(--tx);}
+.ci{font-family:'JetBrains Mono',monospace;background:var(--sf2);border:1px solid var(--bd);
+  border-radius:4px;padding:1px 6px;font-size:.9em;color:var(--or);}
+
+/* ── Lists ── */
+ul.pts{list-style:none;display:flex;flex-direction:column;gap:12px;}
+ul.pts li{display:flex;align-items:flex-start;gap:12px;font-size:15px;line-height:1.6;color:var(--mu);}
+ul.pts li::before{content:'▸';color:var(--ac);font-size:12px;flex-shrink:0;margin-top:4px;}
+ul.pts li strong{color:var(--tx);}
+
+/* ── Terminal ── */
+.term{background:#010409;border:1px solid var(--bd);border-radius:10px;overflow:hidden;
+  font-family:'JetBrains Mono',monospace;font-size:13px;width:100%;}
+.th{background:var(--sf2);padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bd);}
+.dot{width:11px;height:11px;border-radius:50%;}
+.dr{background:#FF5F57;}.dy{background:#FEBC2E;}.dg{background:#28C840;}
+.tt{margin-left:6px;font-size:11px;color:var(--mu);}
+.tb2{padding:18px 22px;display:flex;flex-direction:column;gap:8px;}
+.tl{display:flex;align-items:flex-start;gap:10px;}
+.pr{color:var(--ac);user-select:none;flex-shrink:0;}
+.cm .kw{color:var(--or);}
+.cm .fl{color:var(--bl);}
+.cm .st{color:var(--yw);}
+.out{color:var(--mu);margin-left:20px;font-size:12px;}
+.out.ok{color:var(--ac);}
+.out.wn{color:var(--yw);}
+.out.er{color:var(--rd);}
+.tsep{height:1px;background:var(--bd);margin:6px 0;}
+.tc{color:var(--mu);font-size:11px;}
+
+/* ── Info boxes ── */
+.ib{border-radius:8px;padding:16px 18px;margin-top:14px;}
+.ib .ibl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.ib p{font-size:14px;color:var(--mu);line-height:1.6;}
+.ib p strong{color:var(--tx);}
+.ib-bl{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.3);}
+.ib-bl .ibl{color:var(--bl);}
+.ib-gr{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);}
+.ib-gr .ibl{color:var(--ac);}
+.ib-yw{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);}
+.ib-yw .ibl{color:var(--yw);}
+.ib-rd{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);}
+.ib-rd .ibl{color:var(--rd);}
+
+/* ── State diagram ── */
+.states{display:flex;align-items:center;gap:0;width:100%;margin:20px 0;}
+.stb{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:18px 12px;text-align:center;}
+.stb.hi{border-color:var(--ac);background:rgba(63,185,80,.05);}
+.stb .si{font-size:26px;margin-bottom:6px;}
+.stb .sn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px;}
+.stb .sd{font-size:11px;color:var(--mu);}
+.sarr{display:flex;flex-direction:column;align-items:center;padding:0 8px;min-width:82px;}
+.sarr .sc{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ac);margin-bottom:3px;white-space:nowrap;}
+.sarr .sl{width:100%;height:1px;background:linear-gradient(to right,var(--bd),var(--ac),var(--bd));position:relative;}
+.sarr .sl::after{content:'▶';position:absolute;right:-3px;top:-6px;color:var(--ac);font-size:9px;}
+
+/* ── Commit type table ── */
+table.ct{width:100%;border-collapse:collapse;font-size:13px;}
+table.ct th{text-align:left;padding:9px 14px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);border-bottom:1px solid var(--bd);}
+table.ct td{padding:9px 14px;border-bottom:1px solid var(--sf2);vertical-align:top;}
+table.ct tr:last-child td{border-bottom:none;}
+.bg{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block;}
+.bfeat{background:rgba(63,185,80,.15);color:var(--ac);}
+.bfix{background:rgba(248,81,73,.15);color:var(--rd);}
+.bdocs{background:rgba(88,166,255,.15);color:var(--bl);}
+.bstyle{background:rgba(188,140,255,.15);color:var(--pu);}
+.bref{background:rgba(240,136,62,.15);color:var(--or);}
+.btest{background:rgba(210,153,34,.15);color:var(--yw);}
+.bchore{background:rgba(139,148,158,.15);color:var(--mu);}
+table.ct .ex{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);}
+
+/* ── Reset cards ── */
+.rcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;margin-top:14px;}
+.rc{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:18px;}
+.rc .rn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin-bottom:8px;}
+.rc .rn.so{color:var(--ac);}.rc .rn.mi{color:var(--yw);}.rc .rn.ha{color:var(--rd);}
+.rc.ha-card{border-color:rgba(248,81,73,.3);}
+.rc .rd2{font-size:12px;color:var(--mu);line-height:1.5;margin-bottom:12px;}
+.rc .rl{font-size:11px;font-family:'JetBrains Mono',monospace;}
+.rc .rl .k{color:var(--ac);}.rc .rl .l{color:var(--rd);}
+
+/* ── Summary grid ── */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;margin-top:14px;}
+.sc2{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:18px;}
+.sc2 .sn2{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ac);margin-bottom:8px;}
+.sc2 .sm{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--or);margin-bottom:6px;}
+.sc2 .sd2{font-size:12px;color:var(--mu);line-height:1.4;}
+
+/* ── Analogy card ── */
+.analo{background:linear-gradient(135deg,rgba(63,185,80,.05),rgba(88,166,255,.05));
+  border:1px solid var(--bd);border-radius:10px;padding:24px;
+  display:flex;gap:18px;align-items:flex-start;margin-bottom:20px;}
+.analo .ai{font-size:36px;flex-shrink:0;}
+.analo h3{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+.analo p{font-size:14px;color:var(--mu);line-height:1.7;}
+.analo p strong{color:var(--tx);}
+
+/* ── Title slide specific ── */
+.hero-slide{flex-direction:column;align-items:flex-start;padding-left:10%;}
+.alabel{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px;
+  display:flex;align-items:center;gap:8px;}
+.alabel::before{content:'';width:20px;height:1px;background:var(--ac);}
+.tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);
+  background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:3px 8px;}
+
+.tree-bg{position:absolute;right:6%;top:50%;transform:translateY(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);
+  line-height:1.9;opacity:.35;pointer-events:none;user-select:none;}
+.tree-bg .tg{color:rgba(63,185,80,.6);}
+.tree-bg .tb{color:rgba(88,166,255,.5);}
+.tree-bg .to{color:rgba(240,136,62,.5);}
+</style>
+</head>
+<body>
+<a href="index.html" id="back">← Menu</a>
+<div id="badge">📘 Aula 01 / 03</div>
+<div id="progress"></div>
+
+<div id="deck">
+
+<!-- ────── SLIDE 1: Título ────── -->
+<div class="s on hero-slide" id="s1">
+  <div class="alabel">Aula 01 · Git &amp; GitHub Profissional</div>
+  <h1 class="big">Controlando o <span class="ac">Tempo</span><br>do Seu Código</h1>
+  <p class="subtitle">Salve, rastreie e desfaça mudanças com Git — a ferramenta que toda equipe de desenvolvimento usa no mundo real.</p>
+  <div class="tags">
+    <span class="tag">⏱ 30 min</span>
+    <span class="tag">git add</span><span class="tag">git commit</span>
+    <span class="tag">commits semânticos</span><span class="tag">git reset</span>
+  </div>
+  <div class="tree-bg">
+    <div><span class="tg">*</span> a1b2c3d <span class="tb">(HEAD → main)</span> feat: setup inicial</div>
+    <div><span class="tg">*</span> e4f5g6h docs: adiciona README</div>
+    <div><span class="tg">|</span> <span class="to">*</span> 7h8i9j0 <span class="to">(feature/login)</span> feat: tela de login</div>
+    <div><span class="tg">|</span> <span class="to">*</span> k1l2m3n fix: validação de email</div>
+    <div><span class="tg">|</span>/</div>
+    <div><span class="tg">*</span> n4o5p6q chore: estrutura do projeto</div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 2: O que é Git? ────── -->
+<div class="s" id="s2">
+  <div class="content">
+    <div class="eyebrow">Contexto</div>
+    <h2 class="sh">O que é <span class="ac">Git</span>?</h2>
+    <div class="analo">
+      <div class="ai">🎮</div>
+      <div>
+        <h3>Pense como um jogo com checkpoints</h3>
+        <p>Em um RPG, você <strong>salva o progresso</strong> antes de uma batalha difícil. Se morrer, volta ao save. O Git faz exatamente isso com o seu código: cada <strong>commit</strong> é um checkpoint que você pode visitar ou restaurar a qualquer momento.</p>
+      </div>
+    </div>
+    <ul class="pts">
+      <li><strong>Sistema de Controle de Versão (VCS):</strong> rastreia cada alteração feita em arquivos ao longo do tempo, com autor e data.</li>
+      <li><strong>Distribuído:</strong> cada desenvolvedor tem uma cópia completa do histórico — sem dependência de servidor central.</li>
+      <li><strong>Criado em 2005</strong> por Linus Torvalds para o kernel Linux. Hoje é o padrão absoluto da indústria.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ────── SLIDE 3: Por que importa ────── -->
+<div class="s" id="s3">
+  <div class="content">
+    <div class="eyebrow">Contexto do Projeto</div>
+    <h2 class="sh">Por que isso importa no <span class="ac">projeto ODS</span>?</h2>
+    <div class="two">
+      <div>
+        <p class="lead">Vocês e os alunos do 2º ano vão colaborar em um projeto real vinculado às <strong>ODS da ONU</strong>. Isso significa múltiplos desenvolvedores no mesmo código.</p>
+        <ul class="pts">
+          <li>Rastrear <strong>quem alterou o quê</strong> e quando</li>
+          <li>Trabalhar em funcionalidades <strong>paralelas sem conflito</strong></li>
+          <li><strong>Reverter erros</strong> sem perder o trabalho da equipe</li>
+          <li>Histórico claro de <strong>evolução do projeto</strong></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ib ib-rd">
+          <div class="ibl">😱 Sem Git</div>
+          <p>Arquivos como <strong>projeto_final_v3_DEFINITIVO_AGORA_VAI.zip</strong> passando pelo WhatsApp. Esse é o caos que vamos evitar.</p>
+        </div>
+        <div class="ib ib-gr" style="margin-top:12px;">
+          <div class="ibl">🎯 Meta desta aula</div>
+          <p>Ao final, você cria checkpoints profissionais com mensagens que fazem sentido para toda a equipe.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 4: Configuração ────── -->
+<div class="s" id="s4">
+  <div class="content">
+    <div class="eyebrow">Configuração Inicial</div>
+    <h2 class="sh">Seu <span class="ac">cartão de visita</span> no Git</h2>
+    <p class="lead">Antes de tudo, o Git precisa saber <strong>quem é você</strong>. Essa configuração fica salva globalmente e aparece em cada commit que você fizer.</p>
+    <div class="term">
+      <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">bash — configuração global</span></div>
+      <div class="tb2">
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> config <span class="fl">--global</span> user.name <span class="st">"Seu Nome Completo"</span></span></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> config <span class="fl">--global</span> user.email <span class="st">"seu@email.com"</span></span></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> config <span class="fl">--global</span> core.editor <span class="st">"code --wait"</span></span></div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> config <span class="fl">--list</span></span></div>
+        <div class="out ok">user.name=Seu Nome Completo</div>
+        <div class="out ok">user.email=seu@email.com</div>
+        <div class="out ok">core.editor=code --wait</div>
+      </div>
+    </div>
+    <div class="ib ib-bl">
+      <div class="ibl">💡 Por que --global?</div>
+      <p>Aplica a configuração para <strong>todos os projetos</strong> na sua máquina. Sem o flag, vale só para o repositório atual.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 5: Os 3 estados ────── -->
+<div class="s" id="s5">
+  <div class="content">
+    <div class="eyebrow">Conceito Fundamental</div>
+    <h2 class="sh">Os <span class="ac">3 estados</span> de um arquivo</h2>
+    <p class="lead">Todo arquivo no Git passa por três áreas antes de virar um checkpoint permanente.</p>
+    <div class="states">
+      <div class="stb">
+        <div class="si">📝</div>
+        <div class="sn">Working Directory</div>
+        <div class="sd">Onde você edita. Mudanças ainda não rastreadas pelo Git.</div>
+      </div>
+      <div class="sarr"><div class="sc">git add</div><div class="sl"></div></div>
+      <div class="stb">
+        <div class="si">📦</div>
+        <div class="sn">Staging Area</div>
+        <div class="sd">Sala de espera. Arquivos selecionados para o próximo commit.</div>
+      </div>
+      <div class="sarr"><div class="sc">git commit</div><div class="sl"></div></div>
+      <div class="stb hi">
+        <div class="si">🔒</div>
+        <div class="sn">Repository</div>
+        <div class="sd">Histórico permanente. Checkpoint salvo com hash único.</div>
+      </div>
+    </div>
+    <div class="ib ib-yw">
+      <div class="ibl">🎯 Por que ter Staging Area?</div>
+      <p>Ela permite <strong>escolher exatamente quais mudanças incluir</strong> em cada commit, mesmo tendo alterado vários arquivos. Você pode preparar uma mensagem de commit precisa e coesa.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 6: git init e git status ────── -->
+<div class="s" id="s6">
+  <div class="content">
+    <div class="eyebrow">Primeiros Comandos</div>
+    <h2 class="sh"><span class="ac">Iniciar</span> e <span class="ac">inspecionar</span></h2>
+    <div class="two">
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Criando um repositório do zero:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git init</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> init</span></div>
+            <div class="out ok">Initialized empty Git repository in .git/</div>
+          </div>
+        </div>
+        <div class="ib ib-bl" style="margin-top:12px;">
+          <div class="ibl">📁 A pasta .git</div>
+          <p>O Git cria uma pasta oculta <strong>.git/</strong> onde guarda todo o histórico. <strong>Nunca delete</strong> essa pasta!</p>
+        </div>
+      </div>
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Verificando o estado atual <em>(use sempre)</em>:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git status</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> status</span></div>
+            <div class="out">On branch main</div>
+            <div class="out wn">Untracked files:</div>
+            <div class="out wn">  (use "git add" to track)</div>
+            <div class="out" style="color:var(--rd);">&nbsp;&nbsp;index.html</div>
+            <div class="out" style="color:var(--rd);">&nbsp;&nbsp;styles.css</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--mu);margin-top:10px;">💡 <span class="ci">git status</span> é o comando mais usado no dia a dia. Execute-o constantemente.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 7: git add ────── -->
+<div class="s" id="s7">
+  <div class="content">
+    <div class="eyebrow">Staging Area</div>
+    <h2 class="sh"><span class="ac">git add</span> — Preparando o checkpoint</h2>
+    <p class="lead">Move arquivos do Working Directory para a Staging Area. Pense como selecionar o que vai na mochila antes de fechar o zíper.</p>
+    <div class="term">
+      <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">bash — variações do git add</span></div>
+      <div class="tb2">
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> add index.html</span></div>
+        <div class="out tc"># Adiciona um arquivo específico</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> add src/</span></div>
+        <div class="out tc"># Adiciona uma pasta inteira</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> add .</span></div>
+        <div class="out tc"># Adiciona TUDO que mudou no diretório atual</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> status</span></div>
+        <div class="out ok">Changes to be committed:</div>
+        <div class="out ok">&nbsp;&nbsp;new file:   index.html</div>
+        <div class="out ok">&nbsp;&nbsp;new file:   styles.css</div>
+      </div>
+    </div>
+    <div class="ib ib-yw">
+      <div class="ibl">⚠️ Cuidado com git add .</div>
+      <p>Adiciona tudo, incluindo arquivos com senhas e configs locais. Sempre use <strong>.gitignore</strong> para excluir o que não deve ser versionado (ex: <code style="color:var(--or);">.env</code>, <code style="color:var(--or);">node_modules/</code>).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 8: git commit ────── -->
+<div class="s" id="s8">
+  <div class="content">
+    <div class="eyebrow">Checkpoint</div>
+    <h2 class="sh"><span class="ac">git commit</span> — Salvando para sempre</h2>
+    <div class="two">
+      <div>
+        <p class="lead">O commit cria um snapshot permanente do staging, com autor, data e mensagem descritiva.</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git commit</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> commit <span class="fl">-m</span> <span class="st">"feat: adiciona página inicial"</span></span></div>
+            <div class="out ok">[main a1b2c3d] feat: adiciona página inicial</div>
+            <div class="out">&nbsp;2 files changed, 45 insertions(+)</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> log <span class="fl">--oneline</span></span></div>
+            <div class="out ok">a1b2c3d (HEAD → main) feat: adiciona página inicial</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="lead">O que cada commit guarda:</p>
+        <ul class="pts">
+          <li><strong>Hash SHA-1:</strong> ID único e imutável (ex: a1b2c3d)</li>
+          <li><strong>Autor e data:</strong> quem fez e exatamente quando</li>
+          <li><strong>Mensagem:</strong> o que foi feito e por quê</li>
+          <li><strong>Snapshot:</strong> estado completo dos arquivos</li>
+          <li><strong>Pai:</strong> referência ao commit anterior, formando a cadeia</li>
+        </ul>
+        <div class="ib ib-gr">
+          <div class="ibl">✅ Boa Prática</div>
+          <p>Commits pequenos e frequentes. <strong>Uma mudança lógica por commit</strong> — facilita encontrar bugs e entender a história.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 9: Commits Semânticos - por quê? ────── -->
+<div class="s" id="s9">
+  <div class="content">
+    <div class="eyebrow">Boas Práticas</div>
+    <h2 class="sh">Por que <span class="ac">Commits Semânticos</span>?</h2>
+    <div class="two">
+      <div>
+        <p style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--rd);margin-bottom:8px;">❌ Sem padrão — inútil para a equipe:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git log caótico</span></div>
+          <div class="tb2">
+            <div class="out" style="color:var(--rd);">a1b2c3d ajustes</div>
+            <div class="out" style="color:var(--rd);">e4f5g6h corrigido</div>
+            <div class="out" style="color:var(--rd);">7h8i9j0 wip</div>
+            <div class="out" style="color:var(--rd);">k1l2m3n mudanças</div>
+            <div class="out" style="color:var(--rd);">n4o5p6q finalmente funcionou</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--ac);margin-bottom:8px;">✅ Conventional Commits — leitura instantânea:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git log semântico</span></div>
+          <div class="tb2">
+            <div class="out ok">a1b2c3d feat(auth): login com Google</div>
+            <div class="out ok">e4f5g6h fix(form): valida email vazio</div>
+            <div class="out ok">7h8i9j0 docs: atualiza README</div>
+            <div class="out ok">k1l2m3n style: formata com Prettier</div>
+            <div class="out ok">n4o5p6q chore: configura ESLint</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ib ib-bl" style="margin-top:16px;">
+      <div class="ibl">🎯 Conventional Commits</div>
+      <p>Convenção da indústria que torna o histórico legível, permite gerar changelogs automáticos e facilita code review. Adotada por Vue.js, Angular, Electron e muitos outros projetos Open Source.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 10: Tipos de commits ────── -->
+<div class="s" id="s10">
+  <div class="content wide">
+    <div class="eyebrow">Conventional Commits</div>
+    <h2 class="sh">Estrutura e <span class="ac">tipos</span></h2>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;margin-bottom:18px;font-family:'JetBrains Mono',monospace;font-size:13px;">
+      <span style="color:var(--or);">tipo</span><span style="color:var(--mu);">(</span><span style="color:var(--pu);">escopo</span><span style="color:var(--mu);">)</span><span style="color:var(--tx);">:</span> <span style="color:var(--tx);">descrição curta em minúsculas, sem ponto final</span>
+      &nbsp;&nbsp;<span style="color:var(--mu);font-size:11px;">— ex:</span> <span style="color:var(--ac);">feat(auth): adiciona autenticação com JWT</span>
+    </div>
+    <table class="ct">
+      <thead><tr><th>Tipo</th><th>Quando usar</th><th>Exemplo no projeto ODS</th></tr></thead>
+      <tbody>
+        <tr><td><span class="bg bfeat">feat</span></td><td style="color:var(--mu);font-size:13px;">Nova funcionalidade para o usuário</td><td class="ex">feat(ods): adiciona mapa de impacto</td></tr>
+        <tr><td><span class="bg bfix">fix</span></td><td style="color:var(--mu);font-size:13px;">Correção de bug</td><td class="ex">fix(api): corrige erro 404 na rota /metas</td></tr>
+        <tr><td><span class="bg bdocs">docs</span></td><td style="color:var(--mu);font-size:13px;">Somente documentação</td><td class="ex">docs: adiciona guia de contribuição</td></tr>
+        <tr><td><span class="bg bstyle">style</span></td><td style="color:var(--mu);font-size:13px;">Formatação, sem mudança de lógica</td><td class="ex">style: aplica formatação do Prettier</td></tr>
+        <tr><td><span class="bg bref">refactor</span></td><td style="color:var(--mu);font-size:13px;">Reestruturação sem novo feat ou fix</td><td class="ex">refactor: extrai componente CardODS</td></tr>
+        <tr><td><span class="bg btest">test</span></td><td style="color:var(--mu);font-size:13px;">Adiciona ou corrige testes</td><td class="ex">test: cobre módulo de cálculo de metas</td></tr>
+        <tr><td><span class="bg bchore">chore</span></td><td style="color:var(--mu);font-size:13px;">Manutenção, configs, build</td><td class="ex">chore: atualiza dependências do projeto</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ────── SLIDE 11: git restore ────── -->
+<div class="s" id="s11">
+  <div class="content">
+    <div class="eyebrow">Desfazendo Alterações</div>
+    <h2 class="sh"><span class="ac">git restore</span> — Cancelar antes de commitar</h2>
+    <p class="lead">Desfaz mudanças <strong>não commitadas</strong>. Perfeito para cancelar uma edição errada antes de criar o commit.</p>
+    <div class="two">
+      <div>
+        <p style="font-size:13px;color:var(--mu);margin-bottom:10px;">Descartar edição no Working Directory:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">desfazer edição</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> restore index.html</span></div>
+            <div class="out ok"># Arquivo volta ao estado do último commit</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:13px;color:var(--mu);margin-bottom:10px;">Remover arquivo da Staging Area:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">remover do staging</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> restore <span class="fl">--staged</span> index.html</span></div>
+            <div class="out ok"># Saiu do staging, mas a edição no arquivo permanece</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ib ib-rd">
+      <div class="ibl">⚠️ Operação irreversível</div>
+      <p><strong>git restore</strong> sem <strong>--staged</strong> descarta as mudanças <strong>permanentemente</strong>. O Git não tem como recuperar — a edição simplesmente desaparece. Use com consciência.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 12: git reset ────── -->
+<div class="s" id="s12">
+  <div class="content wide">
+    <div class="eyebrow">Desfazendo Commits</div>
+    <h2 class="sh"><span class="ac">git reset</span> — Voltando no tempo</h2>
+    <p class="lead"><span class="ci">git reset HEAD~1</span> desfaz o <em>último</em> commit. A diferença está em <strong>o que acontece com as suas mudanças:</strong></p>
+    <div class="rcards">
+      <div class="rc">
+        <div class="rn so">--soft</div>
+        <div class="term" style="margin-bottom:10px;">
+          <div class="tb2" style="padding:10px 14px;">
+            <div class="tl"><span class="pr">$</span><span class="cm" style="font-size:12px;"><span class="kw">git</span> reset <span class="fl">--soft</span> HEAD~1</span></div>
+          </div>
+        </div>
+        <div class="rd2">Desfaz o commit, mantém tudo na <strong>Staging Area</strong>. Pronto para criar um novo commit corrigido.</div>
+        <div class="rl"><div class="k">✓ Staging Area mantida</div><div class="k">✓ Working Directory ok</div></div>
+      </div>
+      <div class="rc">
+        <div class="rn mi">--mixed (padrão)</div>
+        <div class="term" style="margin-bottom:10px;">
+          <div class="tb2" style="padding:10px 14px;">
+            <div class="tl"><span class="pr">$</span><span class="cm" style="font-size:12px;"><span class="kw">git</span> reset HEAD~1</span></div>
+          </div>
+        </div>
+        <div class="rd2">Desfaz o commit e limpa a Staging Area. Mudanças ficam no <strong>Working Directory</strong> para editar.</div>
+        <div class="rl"><div class="l">✗ Staging Area limpa</div><div class="k">✓ Working Directory ok</div></div>
+      </div>
+      <div class="rc ha-card">
+        <div class="rn ha">--hard</div>
+        <div class="term" style="margin-bottom:10px;">
+          <div class="tb2" style="padding:10px 14px;">
+            <div class="tl"><span class="pr">$</span><span class="cm" style="font-size:12px;"><span class="kw">git</span> reset <span class="fl">--hard</span> HEAD~1</span></div>
+          </div>
+        </div>
+        <div class="rd2">Desfaz o commit e <strong>apaga tudo</strong>. Código desaparece. Use somente quando tem certeza absoluta.</div>
+        <div class="rl"><div class="l">✗ Staging Area limpa</div><div class="l">✗ Working Directory apagado</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 13: Resumo ────── -->
+<div class="s" id="s13">
+  <div class="content wide">
+    <div class="eyebrow">Resumo da Aula 01</div>
+    <h2 class="sh">O que você <span class="ac">aprendeu</span> hoje</h2>
+    <div class="sgrid">
+      <div class="sc2"><div class="sn2">01</div><div class="sm">git config</div><div class="sd2">Configura nome e email globalmente para identificar seus commits.</div></div>
+      <div class="sc2"><div class="sn2">02</div><div class="sm">git init</div><div class="sd2">Inicializa um repositório Git na pasta atual, criando a pasta .git/.</div></div>
+      <div class="sc2"><div class="sn2">03</div><div class="sm">git status</div><div class="sd2">Mostra o estado atual: arquivos modificados, staged e não rastreados.</div></div>
+      <div class="sc2"><div class="sn2">04</div><div class="sm">git add</div><div class="sd2">Move arquivos para a Staging Area, preparando para o próximo commit.</div></div>
+      <div class="sc2"><div class="sn2">05</div><div class="sm">git commit -m</div><div class="sd2">Cria um checkpoint permanente com mensagem semântica no padrão Conventional Commits.</div></div>
+      <div class="sc2"><div class="sn2">06</div><div class="sm">git reset</div><div class="sd2">Volta no tempo com três modos: --soft, --mixed ou --hard com impactos diferentes.</div></div>
+    </div>
+    <div class="ib ib-gr" style="margin-top:16px;">
+      <div class="ibl">🌿 Fluxo do dia a dia</div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:13px;">
+        <span style="color:var(--mu);">editar arquivos</span> → <span style="color:var(--or);">git add .</span> → <span style="color:var(--or);">git commit -m "tipo: descrição"</span> → <span style="color:var(--mu);">repetir</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 14: Próximos passos ────── -->
+<div class="s" id="s14">
+  <div class="content">
+    <div class="eyebrow">Tarefa e Próximos Passos</div>
+    <h2 class="sh">Antes da <span class="ac">Aula 2</span></h2>
+    <div class="two">
+      <div>
+        <p style="font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-bottom:12px;">📝 Tarefa para casa:</p>
+        <ul class="pts">
+          <li>Crie uma pasta <span class="ci">projeto-ods</span> e inicialize um repositório Git</li>
+          <li>Crie um <span class="ci">README.md</span> descrevendo o projeto e faça o primeiro commit semântico</li>
+          <li>Faça pelo menos <strong>5 commits</strong> usando tipos variados (feat, docs, chore, fix...)</li>
+          <li>Experimente <span class="ci">git log --oneline</span> para visualizar o histórico</li>
+          <li>Desfaça um commit com <span class="ci">git reset --soft HEAD~1</span> e refaça a mensagem</li>
+        </ul>
+      </div>
+      <div>
+        <div class="ib ib-bl" style="margin-bottom:12px;">
+          <div class="ibl">📚 Próxima Aula</div>
+          <p><strong>Aula 2: Branches</strong> — Cada membro da equipe trabalha na sua própria "linha do tempo", sem interferir no código principal.</p>
+        </div>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">prévia — aula 2</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch <span class="fl">-c</span> feature/minha-funcionalidade</span></div>
+            <div class="out ok">Switched to a new branch 'feature/minha-funcionalidade'</div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> merge feature/minha-funcionalidade</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <button class="nb" id="bp" onclick="go(-1)" disabled>←</button>
+  <span id="ctr">1 / 14</span>
+  <button class="nb" id="bn" onclick="go(1)">→</button>
+</div>
+<div class="kbhint"><kbd>←</kbd> <kbd>→</kbd></div>
+
+<script>
+const T=14; let cur=1, dir=1;
+function go(d){
+  const n=cur+d; if(n<1||n>T)return;
+  const oe=document.getElementById('s'+cur), ne=document.getElementById('s'+n);
+  dir=d; oe.classList.remove('on','back'); ne.classList.remove('back');
+  if(d<0) ne.classList.add('back');
+  ne.classList.add('on'); cur=n; up();
+}
+function up(){
+  document.getElementById('ctr').textContent=cur+' / '+T;
+  document.getElementById('bp').disabled=cur===1;
+  document.getElementById('bn').disabled=cur===T;
+  document.getElementById('progress').style.width=(cur/T*100)+'%';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+up();
+</script>
+</body>
+</html>

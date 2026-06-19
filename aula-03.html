@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Aula 03 — GitHub: Colaboração Profissional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1117;--sf:#161B22;--sf2:#21262D;--bd:#30363D;--tx:#E6EDF3;--mu:#8B949E;
+  --ac:#BC8CFF;--gr:#3FB950;--bl:#58A6FF;--or:#F0883E;--yw:#D29922;--rd:#F85149;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;}
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--ac);transition:width .4s ease;z-index:200;}
+#back{position:fixed;top:18px;left:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--mu);text-decoration:none;padding:6px 12px;border-radius:6px;transition:.2s;border:1px solid transparent;}
+#back:hover{color:var(--tx);background:var(--sf2);border-color:var(--bd);}
+#badge{position:fixed;top:18px;right:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--ac);background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:5px 12px;}
+#deck{width:100%;height:100%;position:relative;}
+.s{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:64px 80px 88px;}
+.s.on{display:flex;animation:fi .35s ease;}
+@keyframes fi{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+.s.back{animation:fb .35s ease;}
+#nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;z-index:200;}
+.nb{width:40px;height:40px;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);
+  color:var(--tx);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.nb:hover:not(:disabled){background:var(--bd);border-color:var(--ac);}
+.nb:disabled{opacity:.3;cursor:default;}
+#ctr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);min-width:52px;text-align:center;}
+.kbhint{position:fixed;bottom:28px;right:28px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mu);opacity:.45;}
+kbd{background:var(--sf2);border:1px solid var(--bd);border-radius:3px;padding:1px 5px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);margin-bottom:12px;}
+h1.big{font-family:'JetBrains Mono',monospace;font-size:clamp(30px,4vw,52px);font-weight:700;line-height:1.15;margin-bottom:20px;}
+h1.big .ac{color:var(--ac);}
+h2.sh{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,2.8vw,34px);font-weight:700;margin-bottom:28px;}
+h2.sh .ac{color:var(--ac);}
+.content{flex-direction:column;align-items:flex-start;width:100%;max-width:900px;}
+.wide{max-width:1080px;}
+.subtitle{font-size:17px;color:var(--mu);max-width:560px;line-height:1.7;margin-bottom:32px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:36px;width:100%;align-items:start;}
+.lead{font-size:15px;color:var(--mu);line-height:1.7;margin-bottom:18px;}
+.lead strong{color:var(--tx);}
+.ci{font-family:'JetBrains Mono',monospace;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:1px 6px;font-size:.9em;color:var(--or);}
+ul.pts{list-style:none;display:flex;flex-direction:column;gap:12px;}
+ul.pts li{display:flex;align-items:flex-start;gap:12px;font-size:15px;line-height:1.6;color:var(--mu);}
+ul.pts li::before{content:'▸';color:var(--ac);font-size:12px;flex-shrink:0;margin-top:4px;}
+ul.pts li strong{color:var(--tx);}
+.term{background:#010409;border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:13px;width:100%;}
+.th{background:var(--sf2);padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bd);}
+.dot{width:11px;height:11px;border-radius:50%;}
+.dr{background:#FF5F57;}.dy{background:#FEBC2E;}.dg{background:#28C840;}
+.tt{margin-left:6px;font-size:11px;color:var(--mu);}
+.tb2{padding:18px 22px;display:flex;flex-direction:column;gap:8px;}
+.tl{display:flex;align-items:flex-start;gap:10px;}
+.pr{color:var(--gr);user-select:none;flex-shrink:0;}
+.cm .kw{color:var(--or);}.cm .fl{color:var(--bl);}.cm .st{color:var(--yw);}
+.out{color:var(--mu);margin-left:20px;font-size:12px;}
+.out.ok{color:var(--gr);}.out.bl{color:var(--bl);}.out.pu{color:var(--ac);}
+.out.wn{color:var(--yw);}.out.er{color:var(--rd);}
+.tsep{height:1px;background:var(--bd);margin:4px 0;}
+.tc{color:var(--mu);font-size:11px;}
+.ib{border-radius:8px;padding:16px 18px;margin-top:14px;}
+.ib .ibl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.ib p{font-size:14px;color:var(--mu);line-height:1.6;}
+.ib p strong{color:var(--tx);}
+.ib-pu{background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.3);}
+.ib-pu .ibl{color:var(--ac);}
+.ib-bl{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.3);}
+.ib-bl .ibl{color:var(--bl);}
+.ib-gr{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);}
+.ib-gr .ibl{color:var(--gr);}
+.ib-yw{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);}
+.ib-yw .ibl{color:var(--yw);}
+.ib-rd{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);}
+.ib-rd .ibl{color:var(--rd);}
+.hero-slide{flex-direction:column;align-items:flex-start;padding-left:10%;}
+.alabel{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.alabel::before{content:'';width:20px;height:1px;background:var(--ac);}
+.tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:3px 8px;}
+.tree-bg{position:absolute;right:6%;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);line-height:1.9;opacity:.35;pointer-events:none;user-select:none;}
+.tree-bg .tg{color:rgba(63,185,80,.6);}.tree-bg .tb{color:rgba(88,166,255,.5);}.tree-bg .tp{color:rgba(188,140,255,.5);}
+
+/* ── Compare boxes ── */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;margin-top:12px;}
+.cbox{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:22px;}
+.cbox .ctitle{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;margin-bottom:14px;}
+.cbox.cgit .ctitle{color:var(--or);}.cbox.cgh .ctitle{color:var(--ac);}
+.cbox ul.pts li::before{color:var(--or);}
+.cbox.cgh ul.pts li::before{color:var(--ac);}
+
+/* ── Diagram: local ↔ remote ── */
+.lr-diag{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:center;width:100%;margin:16px 0;}
+.lr-box{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:20px 16px;text-align:center;}
+.lr-box .lt{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--tx);margin-bottom:6px;}
+.lr-box .ls{font-size:12px;color:var(--mu);line-height:1.5;}
+.lr-box.remote{border-color:var(--ac);}
+.lr-arrows{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.lr-arrow{display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'JetBrains Mono',monospace;font-size:10px;}
+.lr-arrow.push{color:var(--gr);}
+.lr-arrow.pull{color:var(--bl);}
+
+/* ── PR flow steps ── */
+.prflow{display:flex;flex-direction:column;gap:6px;width:100%;}
+.prstep{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;
+  background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;}
+.prstep .psnum{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ac);padding-top:2px;}
+.prstep .pscmd{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--or);margin-bottom:2px;}
+.prstep .psdesc{font-size:13px;color:var(--mu);}
+
+/* ── PR template mock ── */
+.pr-mock{background:#010409;border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:12px;width:100%;}
+.pr-mock-header{background:var(--sf2);padding:10px 16px;border-bottom:1px solid var(--bd);}
+.pr-mock-header .pmt{font-size:11px;color:var(--mu);}
+.pr-mock-body{padding:16px 20px;line-height:1.9;}
+.pml{color:var(--ac);}.pmh{color:var(--yw);}.pmb{color:var(--tx);font-size:11px;color:var(--mu);}
+.pmr{color:var(--rd);}
+
+/* ── YAML code block ── */
+.yaml{background:#010409;border:1px solid var(--bd);border-radius:10px;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;width:100%;}
+.yk{color:var(--bl);}.yv{color:var(--yw);}.yc{color:var(--mu);font-style:italic;}.ys{color:var(--gr);}
+
+/* ── Summary grid ── */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-top:12px;}
+.sc2{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:16px;}
+.sc2 .sn2{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ac);margin-bottom:7px;}
+.sc2 .sm{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--or);margin-bottom:5px;}
+.sc2 .sd2{font-size:12px;color:var(--mu);line-height:1.4;}
+
+/* ── Recap cards ── */
+.recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-top:12px;}
+.recap-card{background:var(--sf);border:1px solid var(--bd);border-radius:7px;padding:14px;}
+.recap-card .rc{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--or);margin-bottom:5px;}
+.recap-card .rd{font-size:12px;color:var(--mu);}
+
+/* ── Review comment ── */
+.review-comment{background:var(--sf);border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:8px;}
+.review-header{background:var(--sf2);padding:8px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd);}
+.avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.rv-name{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;}
+.rv-type{font-size:11px;color:var(--mu);}
+.rv-body{padding:10px 14px;font-size:13px;color:var(--mu);line-height:1.5;}
+.rv-body strong{color:var(--tx);}
+</style>
+</head>
+<body>
+<a href="index.html" id="back">← Menu</a>
+<div id="badge">🔮 Aula 03 / 03</div>
+<div id="progress"></div>
+<div id="deck">
+
+<!-- ── SLIDE 1: Título ── -->
+<div class="s on hero-slide" id="s1">
+  <div class="alabel">Aula 03 · Git &amp; GitHub Profissional</div>
+  <h1 class="big">GitHub:<br><span class="ac">Colaboração</span><br>Profissional</h1>
+  <p class="subtitle">Conecte seu repositório ao GitHub, sincronize com a equipe e contribua via Pull Requests.</p>
+  <div class="tags">
+    <span class="tag">⏱ 30 min</span>
+    <span class="tag">git remote</span><span class="tag">git push / pull</span>
+    <span class="tag">Pull Requests</span><span class="tag">GitHub Actions</span>
+  </div>
+  <div class="tree-bg">
+    <div><span class="tp">⬆</span> <span class="tg">pushed to origin/main</span></div>
+    <div><span class="tp">⬇</span> pulled 3 commits from origin</div>
+    <div></div>
+    <div><span class="tg">✓</span> PR #12 merged — feat: mapa ODS</div>
+    <div><span class="tg">✓</span> PR #11 merged — fix: auth token</div>
+    <div><span class="tg">⊙</span> PR #13 open — feature/dashboard</div>
+    <div><span class="tb">  2 reviewers requested</span></div>
+    <div><span class="tb">  CI: ✓ passing</span></div>
+  </div>
+</div>
+
+<!-- ── SLIDE 2: Recap ── -->
+<div class="s" id="s2">
+  <div class="content wide">
+    <div class="eyebrow">Recap · Aula 02 — 30 segundos</div>
+    <h2 class="sh">O que você já <span class="ac">domina</span></h2>
+    <div class="recap-grid">
+      <div class="recap-card"><div class="rc">git branch</div><div class="rd">Cria e lista branches do repositório</div></div>
+      <div class="recap-card"><div class="rc">git switch -c</div><div class="rd">Cria e navega para uma nova branch</div></div>
+      <div class="recap-card"><div class="rc">nomenclatura</div><div class="rd">feature/ · fix/ · docs/ · hotfix/</div></div>
+      <div class="recap-card"><div class="rc">git merge</div><div class="rd">Fast-forward ou merge commit</div></div>
+      <div class="recap-card"><div class="rc">conflitos</div><div class="rd">Editar marcadores → add → commit</div></div>
+      <div class="recap-card"><div class="rc">git log --graph</div><div class="rd">Visualiza árvore de branches</div></div>
+    </div>
+    <div class="ib ib-pu">
+      <div class="ibl">🎯 Última peça do quebra-cabeça</div>
+      <p>Até agora tudo aconteceu <strong>localmente</strong> na sua máquina. Hoje vamos conectar isso a um servidor remoto e colaborar em equipe com fluxos profissionais.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 3: Git ≠ GitHub ── -->
+<div class="s" id="s3">
+  <div class="content">
+    <div class="eyebrow">Conceito Importante</div>
+    <h2 class="sh"><span style="color:var(--or);">Git</span> ≠ <span class="ac">GitHub</span></h2>
+    <div class="compare">
+      <div class="cbox cgit">
+        <div class="ctitle">🔧 Git</div>
+        <ul class="pts">
+          <li>Ferramenta de <strong>controle de versão</strong> local</li>
+          <li>Roda na <strong>sua máquina</strong>, sem internet</li>
+          <li>Criado por Linus Torvalds (2005)</li>
+          <li>Software <strong>open source</strong>, gratuito</li>
+          <li>Gerencia commits, branches, merges</li>
+        </ul>
+      </div>
+      <div class="cbox cgh">
+        <div class="ctitle">🌐 GitHub</div>
+        <ul class="pts">
+          <li><strong>Hospedagem de repositórios</strong> Git na nuvem</li>
+          <li>Plataforma de <strong>colaboração em equipe</strong></li>
+          <li>Criado em 2008, adquirido pela Microsoft (2018)</li>
+          <li>Adiciona: <strong>Pull Requests, Issues, Actions, Projects</strong></li>
+          <li>Alternativas: GitLab, Bitbucket, Azure DevOps</li>
+        </ul>
+      </div>
+    </div>
+    <div class="ib ib-yw" style="margin-top:14px;">
+      <div class="ibl">💡 Analogia</div>
+      <p>Git é o <strong>motor do carro</strong>. GitHub é o <strong>GPS, estacionamento e serviço de carona</strong> junto — ferramentas que tornam a viagem muito mais prática para equipes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 4: git remote ── -->
+<div class="s" id="s4">
+  <div class="content">
+    <div class="eyebrow">Conectando ao GitHub</div>
+    <h2 class="sh"><span class="ac">git remote</span> — Pareando local e remoto</h2>
+    <div class="lr-diag">
+      <div class="lr-box">
+        <div class="lt">💻 Local</div>
+        <div class="ls">Repositório na<br>sua máquina</div>
+      </div>
+      <div class="lr-arrows">
+        <div class="lr-arrow push">⬆ push</div>
+        <div class="lr-arrow pull">⬇ pull</div>
+      </div>
+      <div class="lr-box remote">
+        <div class="lt">☁️ Remote (GitHub)</div>
+        <div class="ls">Repositório na nuvem<br>acessível pela equipe</div>
+      </div>
+    </div>
+    <div class="term">
+      <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">bash — conectar repositório ao GitHub</span></div>
+      <div class="tb2">
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> remote add origin https://github.com/org/projeto-ods.git</span></div>
+        <div class="out tc"># "origin" é o apelido padrão para o remoto principal</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> remote <span class="fl">-v</span></span></div>
+        <div class="out ok">origin  https://github.com/org/projeto-ods.git (fetch)</div>
+        <div class="out ok">origin  https://github.com/org/projeto-ods.git (push)</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> remote rename origin upstream</span></div>
+        <div class="out tc"># Renomeia o apelido (útil ao trabalhar com fork)</div>
+      </div>
+    </div>
+    <div class="ib ib-pu">
+      <div class="ibl">📌 Criando no GitHub primeiro?</div>
+      <p>Se o repositório já existe no GitHub, use <span class="ci">git clone URL</span> — ele já configura o remote automaticamente. O <span class="ci">git remote add</span> é para quando você <strong>já tem um repo local</strong> e quer publicá-lo.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 5: git push ── -->
+<div class="s" id="s5">
+  <div class="content">
+    <div class="eyebrow">Enviando Código</div>
+    <h2 class="sh"><span class="ac">git push</span> — Publicando suas mudanças</h2>
+    <div class="two">
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Primeiro push — configura o rastreamento:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">primeiro push</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> push <span class="fl">-u</span> origin main</span></div>
+            <div class="out ok">Branch 'main' set up to track 'origin/main'.</div>
+            <div class="out ok">To https://github.com/org/projeto-ods.git</div>
+            <div class="out ok"> * [new branch]      main → main</div>
+          </div>
+        </div>
+        <div class="ib ib-gr" style="margin-top:12px;">
+          <div class="ibl">💡 -u (--set-upstream)</div>
+          <p>Só necessário no <strong>primeiro push</strong> de cada branch. Depois, basta usar <span class="ci">git push</span>.</p>
+        </div>
+      </div>
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Pushes subsequentes e branches:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">push de feature branch</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> push</span></div>
+            <div class="out ok">Enumerating objects: 5, done.</div>
+            <div class="out ok">To https://github.com/org/projeto-ods.git</div>
+            <div class="out ok">   a1b2c3d..e4f5g6h  main → main</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch <span class="fl">-c</span> feature/nova</span></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> push <span class="fl">-u</span> origin feature/nova</span></div>
+            <div class="out ok"> * [new branch]  feature/nova → feature/nova</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 6: fetch vs pull ── -->
+<div class="s" id="s6">
+  <div class="content">
+    <div class="eyebrow">Recebendo Atualizações</div>
+    <h2 class="sh"><span class="ac">fetch</span> vs <span class="ac">pull</span> — Qual a diferença?</h2>
+    <div class="two">
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);margin-bottom:8px;">git fetch — "mostra sem aplicar"</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git fetch</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> fetch origin</span></div>
+            <div class="out ok">From https://github.com/org/projeto-ods</div>
+            <div class="out ok">   a1b2c3d..e4f5g6h  main → origin/main</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> log HEAD..origin/main <span class="fl">--oneline</span></span></div>
+            <div class="out pu">e4f5g6h feat(auth): login com Google</div>
+          </div>
+        </div>
+        <div class="ib ib-pu" style="margin-top:12px;">
+          <div class="ibl">fetch + inspect</div>
+          <p>Baixa commits sem alterar sua branch local. Você <strong>inspeciona antes de aplicar</strong> — ideal quando quer ver o que mudou.</p>
+        </div>
+      </div>
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--bl);margin-bottom:8px;">git pull — "busca e aplica"</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git pull</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> pull</span></div>
+            <div class="out ok">Updating a1b2c3d..e4f5g6h</div>
+            <div class="out ok">Fast-forward</div>
+            <div class="out ok"> auth.js | 30 ++++++++++</div>
+          </div>
+        </div>
+        <div class="ib ib-bl" style="margin-top:12px;">
+          <div class="ibl">pull = fetch + merge</div>
+          <p>Baixa E aplica imediatamente. Pode gerar <strong>conflitos se você tiver commits locais</strong> que não foram publicados ainda.</p>
+        </div>
+      </div>
+    </div>
+    <div class="ib ib-yw">
+      <div class="ibl">🎯 Recomendação</div>
+      <p>Comece o dia de trabalho com <span class="ci">git pull</span> na branch main. Antes de abrir um PR, faça <span class="ci">git pull</span> na sua feature branch para pegar as últimas atualizações.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 7: O que é um PR? ── -->
+<div class="s" id="s7">
+  <div class="content">
+    <div class="eyebrow">Colaboração no GitHub</div>
+    <h2 class="sh">O que é um <span class="ac">Pull Request</span>?</h2>
+    <div class="two">
+      <div>
+        <p class="lead">Um PR é uma <strong>solicitação para mesclar sua branch</strong> no main. Mas mais do que isso — é um <strong>espaço de revisão e discussão</strong> do código.</p>
+        <ul class="pts">
+          <li>Ninguém merge código no <strong>main diretamente</strong> — tudo passa por revisão</li>
+          <li>Colegas podem <strong>comentar linha a linha</strong>, sugerir mudanças</li>
+          <li>CI/CD (GitHub Actions) roda <strong>testes automáticos</strong> no PR</li>
+          <li>Exige <strong>aprovações mínimas</strong> antes do merge</li>
+          <li>Cria um <strong>registro permanente</strong> da decisão e justificativa</li>
+        </ul>
+      </div>
+      <div>
+        <div class="ib ib-pu">
+          <div class="ibl">🎯 Por que "Pull Request"?</div>
+          <p>Você está pedindo ao dono do repositório: <em>"Por favor, <strong>faça um pull</strong> das minhas mudanças para dentro do seu código."</em> O nome vem dessa ideia original.</p>
+        </div>
+        <div class="ib ib-gr" style="margin-top:12px;">
+          <div class="ibl">🌱 No Projeto ODS</div>
+          <p>Nenhum código entra no main sem ao menos <strong>1 aprovação</strong> de um colega do 2º ano. O PR é a porta de entrada obrigatória.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 8: Fluxo de PR ── -->
+<div class="s" id="s8">
+  <div class="content">
+    <div class="eyebrow">Passo a Passo</div>
+    <h2 class="sh">Fluxo completo de um <span class="ac">Pull Request</span></h2>
+    <div class="prflow">
+      <div class="prstep">
+        <div class="psnum">01</div>
+        <div><div class="pscmd">git switch -c feature/nova-funcionalidade</div><div class="psdesc">Cria a branch dedicada para a funcionalidade.</div></div>
+      </div>
+      <div class="prstep">
+        <div class="psnum">02</div>
+        <div><div class="pscmd">git commit -m "feat: implementa nova funcionalidade"</div><div class="psdesc">Desenvolve e cria commits semânticos na branch.</div></div>
+      </div>
+      <div class="prstep">
+        <div class="psnum">03</div>
+        <div><div class="pscmd">git push -u origin feature/nova-funcionalidade</div><div class="psdesc">Publica a branch no GitHub para que o PR possa ser criado.</div></div>
+      </div>
+      <div class="prstep">
+        <div class="psnum">04</div>
+        <div><div class="pscmd">GitHub → Compare &amp; pull request → Preencher template</div><div class="psdesc">Cria o PR com título semântico, descrição seguindo o template da organização e revisores.</div></div>
+      </div>
+      <div class="prstep">
+        <div class="psnum">05</div>
+        <div><div class="pscmd">Code Review → Responder comentários → Push de ajustes</div><div class="psdesc">Revisores comentam; você faz ajustes com novos commits na mesma branch.</div></div>
+      </div>
+      <div class="prstep">
+        <div class="psnum">06</div>
+        <div><div class="pscmd">Aprovação → Squash &amp; Merge → Branch deletada</div><div class="psdesc">Após aprovação e CI passando, o merge é feito e a branch é limpa.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 9: Anatomia de um PR ── -->
+<div class="s" id="s9">
+  <div class="content wide">
+    <div class="eyebrow">Boas Práticas</div>
+    <h2 class="sh">Anatomia de um <span class="ac">bom PR</span></h2>
+    <div class="two">
+      <div>
+        <ul class="pts" style="gap:14px;">
+          <li><strong>Título semântico:</strong> segue Conventional Commits — <span class="ci">feat(mapa): adiciona camadas de ODS</span></li>
+          <li><strong>Tamanho ideal:</strong> PRs pequenos e focados são revisados mais rápido e com mais qualidade. Evite PRs "monstro".</li>
+          <li><strong>Descrição completa:</strong> o quê mudou, por quê, como testar, screenshots se for visual.</li>
+          <li><strong>Revisores:</strong> mínimo 1, idealmente alguém do 2º ano para o projeto ODS.</li>
+          <li><strong>Labels:</strong> feature, bug, docs, WIP — para organizar e filtrar PRs abertos.</li>
+          <li><strong>Linked Issue:</strong> referencia a task ou issue relacionada com <span class="ci">Closes #42</span>.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">Título de PR — exemplos</span></div>
+          <div class="tb2">
+            <div class="out ok">✓ feat(mapa): adiciona camadas ODS interativas</div>
+            <div class="out ok">✓ fix(auth): corrige token expirado no login</div>
+            <div class="out ok">✓ docs: atualiza guia de contribuição</div>
+            <div class="tsep"></div>
+            <div class="out er">✗ atualiza coisas</div>
+            <div class="out er">✗ DONE</div>
+            <div class="out er">✗ fix bug</div>
+          </div>
+        </div>
+        <div class="ib ib-yw" style="margin-top:12px;">
+          <div class="ibl">⚠️ WIP PRs</div>
+          <p>Use <strong>Draft Pull Request</strong> para sinalizar que o trabalho ainda está em progresso. Isso evita merge prematuro e ainda permite feedback antecipado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 10: Template de PR ── -->
+<div class="s" id="s10">
+  <div class="content">
+    <div class="eyebrow">Template de PR</div>
+    <h2 class="sh">Preenchendo o <span class="ac">template</span> da organização</h2>
+    <p class="lead">A organização do projeto ODS tem um template em <span class="ci">.github/PULL_REQUEST_TEMPLATE.md</span> — ele aparece automaticamente ao criar um PR:</p>
+    <div class="pr-mock">
+      <div class="pr-mock-header"><span class="pmt">📋 PULL_REQUEST_TEMPLATE.md — Projeto ODS</span></div>
+      <div class="pr-mock-body">
+        <div class="pmh">## 🎯 Descrição</div>
+        <div class="pmb">&lt;!-- O que essa PR faz? Por que essa mudança é necessária? --&gt;</div>
+        <br>
+        <div class="pmh">## ✅ Checklist</div>
+        <div class="pmb">- [ ] Código segue as convenções do projeto</div>
+        <div class="pmb">- [ ] Commits semânticos foram usados</div>
+        <div class="pmb">- [ ] Testei localmente e está funcionando</div>
+        <div class="pmb">- [ ] Documentação foi atualizada (se aplicável)</div>
+        <br>
+        <div class="pmh">## 🔗 Issue relacionada</div>
+        <div class="pmb">Closes #<span class="pml">[número]</span></div>
+        <br>
+        <div class="pmh">## 📸 Screenshots (se visual)</div>
+        <div class="pmb">&lt;!-- Antes / Depois --&gt;</div>
+        <br>
+        <div class="pmh">## 💬 Notas para o Revisor</div>
+        <div class="pmb">&lt;!-- Algo que o revisor deve prestar atenção? --&gt;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 11: Code Review ── -->
+<div class="s" id="s11">
+  <div class="content">
+    <div class="eyebrow">Revisão de Código</div>
+    <h2 class="sh"><span class="ac">Code Review</span> — Colaborando na qualidade</h2>
+    <div class="two">
+      <div>
+        <p class="lead" style="margin-bottom:14px;">Tipos de feedback no GitHub:</p>
+        <div class="review-comment">
+          <div class="review-header">
+            <div class="avatar" style="background:rgba(63,185,80,.2);color:var(--gr);">A</div>
+            <span class="rv-name" style="color:var(--gr);">ana-2ano</span>
+            <span class="rv-type">· Solicitação de mudança</span>
+          </div>
+          <div class="rv-body">Essa função ficou muito longa. Você consegue <strong>extrair o cálculo</strong> para um método separado? Facilita os testes e a leitura.</div>
+        </div>
+        <div class="review-comment">
+          <div class="review-header">
+            <div class="avatar" style="background:rgba(88,166,255,.2);color:var(--bl);">C</div>
+            <span class="rv-name" style="color:var(--bl);">carlos-1ano</span>
+            <span class="rv-type">· Comentário</span>
+          </div>
+          <div class="rv-body">Boa ideia usar <strong>async/await</strong> aqui em vez de callback. Muito mais legível!</div>
+        </div>
+        <div class="review-comment">
+          <div class="review-header">
+            <div class="avatar" style="background:rgba(188,140,255,.2);color:var(--ac);">P</div>
+            <span class="rv-name" style="color:var(--ac);">pedro-2ano</span>
+            <span class="rv-type">· Aprovado ✓</span>
+          </div>
+          <div class="rv-body">LGTM! Código limpo e os testes cobrem os casos principais. Aprovado para merge.</div>
+        </div>
+      </div>
+      <div>
+        <p class="lead">Como responder ao review:</p>
+        <ul class="pts">
+          <li>Leia todos os comentários <strong>antes de sair mudando</strong> tudo</li>
+          <li>Faça as mudanças solicitadas e dê <span class="ci">git push</span> — os commits aparecem no PR</li>
+          <li><strong>Responda cada comentário</strong> explicando o que fez ou por que discorda</li>
+          <li>Marque comentários resolvidos com <strong>"Resolve conversation"</strong></li>
+          <li>Se discordar, <strong>argumente com educação</strong> — o revisor pode ter razão</li>
+        </ul>
+        <div class="ib ib-pu">
+          <div class="ibl">🤝 Cultura de review</div>
+          <p>Review <strong>não é crítica à pessoa</strong>, é cuidado com o código. Seja construtivo ao revisar e aberto ao receber feedback.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 12: GitHub Actions ── -->
+<div class="s" id="s12">
+  <div class="content">
+    <div class="eyebrow">Automação</div>
+    <h2 class="sh">GitHub <span class="ac">Actions</span> — CI no seu PR</h2>
+    <div class="two">
+      <div>
+        <p class="lead">GitHub Actions é a plataforma de automação do GitHub. Permite executar tarefas automáticas quando eventos acontecem no repositório — como a abertura de um PR.</p>
+        <ul class="pts">
+          <li>Arquivo YAML em <span class="ci">.github/workflows/</span></li>
+          <li><strong>on: pull_request</strong> → roda ao abrir ou atualizar um PR</li>
+          <li>Garante que o código <strong>não quebra antes do merge</strong></li>
+          <li>No projeto ODS: lint, testes e build automáticos</li>
+        </ul>
+      </div>
+      <div>
+        <div class="yaml">
+          <div><span class="yc"># .github/workflows/pr-check.yml</span></div>
+          <div><span class="yk">name:</span> <span class="yv">PR Check</span></div>
+          <br>
+          <div><span class="yk">on:</span></div>
+          <div>&nbsp;&nbsp;<span class="yk">pull_request:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">branches:</span> <span class="yv">[ main ]</span></div>
+          <br>
+          <div><span class="yk">jobs:</span></div>
+          <div>&nbsp;&nbsp;<span class="yk">build:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">runs-on:</span> <span class="yv">ubuntu-latest</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">steps:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- uses:</span> <span class="yv">actions/checkout@v4</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- name:</span> <span class="yv">Install deps</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">run:</span> <span class="ys">npm install</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- name:</span> <span class="yv">Run tests</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">run:</span> <span class="ys">npm test</span></div>
+        </div>
+        <div class="ib ib-gr" style="margin-top:12px;">
+          <div class="ibl">✅ Status no PR</div>
+          <p>O resultado do workflow aparece no PR com <strong>✓ passing</strong> ou <strong>✗ failing</strong>. Branches protegidas só permitem merge após CI passar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 13: Resumo do curso ── -->
+<div class="s" id="s13">
+  <div class="content wide">
+    <div class="eyebrow">Resumo do Curso</div>
+    <h2 class="sh">3 Aulas, 1 <span class="ac">fluxo completo</span></h2>
+    <div class="sgrid">
+      <div class="sc2"><div class="sn2">Aula 01</div><div class="sm">git add/commit</div><div class="sd2">Checkpoints semânticos com Conventional Commits.</div></div>
+      <div class="sc2"><div class="sn2">Aula 01</div><div class="sm">git reset</div><div class="sd2">Desfazer com segurança: soft, mixed e hard.</div></div>
+      <div class="sc2"><div class="sn2">Aula 02</div><div class="sm">git branch</div><div class="sd2">Linhas do tempo independentes para cada feature.</div></div>
+      <div class="sc2"><div class="sn2">Aula 02</div><div class="sm">git merge</div><div class="sd2">Integrar branches e resolver conflitos.</div></div>
+      <div class="sc2"><div class="sn2">Aula 03</div><div class="sm">git push/pull</div><div class="sd2">Sincronizar com o remoto e receber atualizações.</div></div>
+      <div class="sc2"><div class="sn2">Aula 03</div><div class="sm">Pull Requests</div><div class="sd2">Revisão, template, CI e aprovação antes do merge.</div></div>
+    </div>
+    <div class="ib ib-pu" style="margin-top:14px;">
+      <div class="ibl">🚀 Fluxo profissional completo</div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;">
+        <span style="color:var(--or);">git switch -c feature/X</span> → commits semânticos →
+        <span style="color:var(--or);">git push -u origin feature/X</span> → abrir PR → review →
+        aprovação → CI ✓ → merge → branch deletada
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 14: Desafio Final ── -->
+<div class="s" id="s14">
+  <div class="content">
+    <div class="eyebrow">Próximo Passo</div>
+    <h2 class="sh">Prepare-se para o <span class="ac">Desafio Final</span></h2>
+    <div class="two">
+      <div>
+        <p class="lead">Você vai simular a entrada de um novo desenvolvedor no projeto ODS:</p>
+        <ul class="pts" style="gap:10px;">
+          <li>Clone o repositório da organização</li>
+          <li>Crie a branch <span class="ci">feature/seu-nome/funcionalidade</span></li>
+          <li>Implemente uma funcionalidade simples</li>
+          <li>Faça <strong>3+ commits semânticos</strong></li>
+          <li>Faça push e abra um <strong>PR seguindo o template</strong></li>
+          <li>Peça review para pelo menos 1 colega</li>
+          <li>Faça ajustes baseados no feedback recebido</li>
+          <li>Aguarde aprovação e CI para o merge</li>
+        </ul>
+      </div>
+      <div>
+        <div class="ib ib-pu">
+          <div class="ibl">📓 Caderno de Exercícios</div>
+          <p>O desafio completo com todos os detalhes, critérios e dicas está no <strong>Caderno de Exercícios</strong> disponível no menu principal.</p>
+        </div>
+        <div class="ib ib-gr" style="margin-top:12px;">
+          <div class="ibl">🔒 Aula 04 — Em breve</div>
+          <p>Quando as documentações do 2º ano estiverem prontas, teremos uma aula dedicada à <strong>organização real do projeto ODS</strong> no GitHub.</p>
+        </div>
+        <div class="term" style="margin-top:12px;">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">você agora sabe fazer isso</span></div>
+          <div class="tb2">
+            <div class="out ok">✓ git clone · branch · commits</div>
+            <div class="out ok">✓ push · PR · review · merge</div>
+            <div class="out ok">✓ GitHub Actions CI ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="nav">
+  <button class="nb" id="bp" onclick="go(-1)" disabled>←</button>
+  <span id="ctr">1 / 14</span>
+  <button class="nb" id="bn" onclick="go(1)">→</button>
+</div>
+<div class="kbhint"><kbd>←</kbd> <kbd>→</kbd></div>
+<script>
+const T=14; let cur=1;
+function go(d){
+  const n=cur+d; if(n<1||n>T)return;
+  const oe=document.getElementById('s'+cur), ne=document.getElementById('s'+n);
+  oe.classList.remove('on','back'); ne.classList.remove('back');
+  if(d<0) ne.classList.add('back');
+  ne.classList.add('on'); cur=n; up();
+}
+function up(){
+  document.getElementById('ctr').textContent=cur+' / '+T;
+  document.getElementById('bp').disabled=cur===1;
+  document.getElementById('bn').disabled=cur===T;
+  document.getElementById('progress').style.width=(cur/T*100)+'%';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+up();
+</script>
+</body>
+</html>

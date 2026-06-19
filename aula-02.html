@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Aula 02 — Branches: Desenvolvendo em Paralelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1117;--sf:#161B22;--sf2:#21262D;--bd:#30363D;--tx:#E6EDF3;--mu:#8B949E;
+  --ac:#58A6FF;--gr:#3FB950;--or:#F0883E;--yw:#D29922;--rd:#F85149;--pu:#BC8CFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;}
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--ac);transition:width .4s ease;z-index:200;}
+#back{position:fixed;top:18px;left:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--mu);text-decoration:none;padding:6px 12px;border-radius:6px;transition:.2s;border:1px solid transparent;}
+#back:hover{color:var(--tx);background:var(--sf2);border-color:var(--bd);}
+#badge{position:fixed;top:18px;right:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--ac);background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:5px 12px;}
+#deck{width:100%;height:100%;position:relative;}
+.s{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:64px 80px 88px;}
+.s.on{display:flex;animation:fi .35s ease;}
+@keyframes fi{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+.s.back{animation:fb .35s ease;}
+#nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;z-index:200;}
+.nb{width:40px;height:40px;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);
+  color:var(--tx);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.nb:hover:not(:disabled){background:var(--bd);border-color:var(--ac);}
+.nb:disabled{opacity:.3;cursor:default;}
+#ctr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);min-width:52px;text-align:center;}
+.kbhint{position:fixed;bottom:28px;right:28px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mu);opacity:.45;}
+kbd{background:var(--sf2);border:1px solid var(--bd);border-radius:3px;padding:1px 5px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--ac);margin-bottom:12px;}
+h1.big{font-family:'JetBrains Mono',monospace;font-size:clamp(30px,4vw,52px);font-weight:700;line-height:1.15;margin-bottom:20px;}
+h1.big .ac{color:var(--ac);}
+h2.sh{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,2.8vw,34px);font-weight:700;margin-bottom:28px;}
+h2.sh .ac{color:var(--ac);}
+.content{flex-direction:column;align-items:flex-start;width:100%;max-width:900px;}
+.wide{max-width:1080px;}
+.subtitle{font-size:17px;color:var(--mu);max-width:560px;line-height:1.7;margin-bottom:32px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:36px;width:100%;align-items:start;}
+.lead{font-size:15px;color:var(--mu);line-height:1.7;margin-bottom:18px;}
+.lead strong{color:var(--tx);}
+.ci{font-family:'JetBrains Mono',monospace;background:var(--sf2);border:1px solid var(--bd);
+  border-radius:4px;padding:1px 6px;font-size:.9em;color:var(--or);}
+ul.pts{list-style:none;display:flex;flex-direction:column;gap:12px;}
+ul.pts li{display:flex;align-items:flex-start;gap:12px;font-size:15px;line-height:1.6;color:var(--mu);}
+ul.pts li::before{content:'▸';color:var(--ac);font-size:12px;flex-shrink:0;margin-top:4px;}
+ul.pts li strong{color:var(--tx);}
+.term{background:#010409;border:1px solid var(--bd);border-radius:10px;overflow:hidden;
+  font-family:'JetBrains Mono',monospace;font-size:13px;width:100%;}
+.th{background:var(--sf2);padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bd);}
+.dot{width:11px;height:11px;border-radius:50%;}
+.dr{background:#FF5F57;}.dy{background:#FEBC2E;}.dg{background:#28C840;}
+.tt{margin-left:6px;font-size:11px;color:var(--mu);}
+.tb2{padding:18px 22px;display:flex;flex-direction:column;gap:8px;}
+.tl{display:flex;align-items:flex-start;gap:10px;}
+.pr{color:var(--gr);user-select:none;flex-shrink:0;}
+.cm .kw{color:var(--or);}.cm .fl{color:var(--ac);}.cm .st{color:var(--yw);}
+.out{color:var(--mu);margin-left:20px;font-size:12px;}
+.out.ok{color:var(--gr);}.out.wn{color:var(--yw);}.out.er{color:var(--rd);}
+.out.bl{color:var(--ac);}
+.tsep{height:1px;background:var(--bd);margin:4px 0;}
+.tc{color:var(--mu);font-size:11px;}
+.ib{border-radius:8px;padding:16px 18px;margin-top:14px;}
+.ib .ibl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.ib p{font-size:14px;color:var(--mu);line-height:1.6;}
+.ib p strong{color:var(--tx);}
+.ib-bl{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.3);}
+.ib-bl .ibl{color:var(--ac);}
+.ib-gr{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);}
+.ib-gr .ibl{color:var(--gr);}
+.ib-yw{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);}
+.ib-yw .ibl{color:var(--yw);}
+.ib-rd{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);}
+.ib-rd .ibl{color:var(--rd);}
+.hero-slide{flex-direction:column;align-items:flex-start;padding-left:10%;}
+.alabel{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px;
+  display:flex;align-items:center;gap:8px;}
+.alabel::before{content:'';width:20px;height:1px;background:var(--ac);}
+.tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);
+  background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:3px 8px;}
+.tree-bg{position:absolute;right:6%;top:50%;transform:translateY(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);
+  line-height:1.9;opacity:.35;pointer-events:none;user-select:none;}
+.tree-bg .tg{color:rgba(63,185,80,.6);}
+.tree-bg .tb{color:rgba(88,166,255,.5);}
+.tree-bg .to{color:rgba(240,136,62,.5);}
+
+/* ── Branch diagram ── */
+.bdiag{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9;
+  background:#010409;border:1px solid var(--bd);border-radius:10px;padding:20px 24px;width:100%;margin:16px 0;}
+.bdiag .m{color:var(--gr);}
+.bdiag .f{color:var(--ac);}
+.bdiag .l{color:var(--mu);}
+.bdiag .h{color:var(--yw);}
+
+/* ── Step cards ── */
+.steps{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:8px;}
+.step{display:flex;align-items:flex-start;gap:14px;background:var(--sf);
+  border:1px solid var(--bd);border-radius:8px;padding:12px 16px;}
+.step .snum{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--ac);min-width:20px;margin-top:2px;}
+.step .scmd{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--or);margin-bottom:3px;}
+.step .sdesc{font-size:13px;color:var(--mu);}
+
+/* ── Summary grid ── */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;margin-top:14px;}
+.sc2{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:18px;}
+.sc2 .sn2{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ac);margin-bottom:8px;}
+.sc2 .sm{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--or);margin-bottom:6px;}
+.sc2 .sd2{font-size:12px;color:var(--mu);line-height:1.4;}
+
+/* ── Conflict display ── */
+.conflict{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;
+  background:#010409;border:1px solid var(--bd);border-radius:10px;padding:18px 22px;width:100%;}
+.conflict .cm{color:var(--rd);}.conflict .cb{color:var(--ac);}.conflict .code{color:var(--tx);}
+
+/* ── Naming table ── */
+.ntable{width:100%;border-collapse:collapse;font-size:13px;}
+.ntable th{text-align:left;padding:8px 14px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);border-bottom:1px solid var(--bd);}
+.ntable td{padding:9px 14px;border-bottom:1px solid var(--sf2);vertical-align:top;}
+.ntable tr:last-child td{border-bottom:none;}
+.nbadge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.nf{background:rgba(63,185,80,.15);color:var(--gr);}
+.nfx{background:rgba(248,81,73,.15);color:var(--rd);}
+.nd{background:rgba(88,166,255,.15);color:var(--ac);}
+.nh{background:rgba(240,136,62,.15);color:var(--or);}
+.nr{background:rgba(210,153,34,.15);color:var(--yw);}
+
+/* ── Recap card ── */
+.recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-top:12px;}
+.recap-card{background:var(--sf);border:1px solid var(--bd);border-radius:7px;padding:14px;}
+.recap-card .rc{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--or);margin-bottom:5px;}
+.recap-card .rd{font-size:12px;color:var(--mu);}
+</style>
+</head>
+<body>
+<a href="index.html" id="back">← Menu</a>
+<div id="badge">🌿 Aula 02 / 03</div>
+<div id="progress"></div>
+<div id="deck">
+
+<!-- ── SLIDE 1: Título ── -->
+<div class="s on hero-slide" id="s1">
+  <div class="alabel">Aula 02 · Git &amp; GitHub Profissional</div>
+  <h1 class="big">Branches:<br><span class="ac">Desenvolvendo</span><br>em Paralelo</h1>
+  <p class="subtitle">Trabalhe em funcionalidades isoladas, sem bagunçar o código da equipe, e una tudo no momento certo.</p>
+  <div class="tags">
+    <span class="tag">⏱ 30 min</span>
+    <span class="tag">git branch</span><span class="tag">git switch</span>
+    <span class="tag">git merge</span><span class="tag">conflitos</span>
+  </div>
+  <div class="tree-bg">
+    <div><span class="tg">*</span> 5e8a1b2 <span class="tb">(HEAD → main)</span> feat: merge feature/login</div>
+    <div><span class="tg">|\</span></div>
+    <div><span class="tg">|</span> <span class="to">*</span> 3c7d9e0 <span class="to">(feature/login)</span> fix: validação</div>
+    <div><span class="tg">|</span> <span class="to">*</span> 1a4f6b8 feat(login): formulário</div>
+    <div><span class="tg">|/</span></div>
+    <div><span class="tg">*</span> 9b2c4d6 chore: setup inicial</div>
+    <div><span class="tg">*</span> 7f2b4e1 docs: README</div>
+  </div>
+</div>
+
+<!-- ── SLIDE 2: Recap ── -->
+<div class="s" id="s2">
+  <div class="content wide">
+    <div class="eyebrow">Recap · Aula 01 — 30 segundos</div>
+    <h2 class="sh">O que você já <span class="ac">sabe</span></h2>
+    <div class="recap-grid">
+      <div class="recap-card"><div class="rc">git config</div><div class="rd">Configura nome e email globalmente</div></div>
+      <div class="recap-card"><div class="rc">git init</div><div class="rd">Inicializa repositório criando .git/</div></div>
+      <div class="recap-card"><div class="rc">git status</div><div class="rd">Exibe o estado atual dos arquivos</div></div>
+      <div class="recap-card"><div class="rc">git add .</div><div class="rd">Leva arquivos para a Staging Area</div></div>
+      <div class="recap-card"><div class="rc">git commit -m</div><div class="rd">Cria checkpoint com mensagem semântica</div></div>
+      <div class="recap-card"><div class="rc">git reset</div><div class="rd">Desfaz commits (--soft / --mixed / --hard)</div></div>
+    </div>
+    <div class="ib ib-bl">
+      <div class="ibl">🎯 Hoje vamos além</div>
+      <p>Até agora trabalhamos em uma única linha do tempo. Hoje você aprende a criar <strong>ramificações paralelas</strong> — essencial para o trabalho em equipe.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 3: O problema sem branches ── -->
+<div class="s" id="s3">
+  <div class="content">
+    <div class="eyebrow">O Problema</div>
+    <h2 class="sh">Todos no <span class="ac">main</span> = caos</h2>
+    <div class="two">
+      <div>
+        <p class="lead">Imagine o projeto ODS com 5 pessoas trabalhando diretamente no <span class="ci">main</span>:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git log — main sem branches</span></div>
+          <div class="tb2">
+            <div class="out" style="color:var(--rd);">a1b2c3 Pedro: muda o CSS do header</div>
+            <div class="out" style="color:var(--rd);">e4f5g6 Ana: adiciona mapa (incompleto)</div>
+            <div class="out" style="color:var(--rd);">7h8i9j Pedro: reverte o CSS (quebrou)</div>
+            <div class="out" style="color:var(--rd);">k1l2m3 Ana: mapa quebrado, revert</div>
+            <div class="out" style="color:var(--rd);">n4o5p6 Carlos: commit por cima do revert</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="pts">
+          <li>Funcionalidades <strong>incompletas entram no código principal</strong> e quebram o projeto</li>
+          <li><strong>Impossível trabalhar em paralelo</strong> sem pisar no código do colega</li>
+          <li>O histórico vira um <strong>labirinto impossível</strong> de entender</li>
+          <li><strong>Um erro de uma pessoa para o trabalho de todos</strong></li>
+        </ul>
+        <div class="ib ib-bl" style="margin-top:14px;">
+          <div class="ibl">💡 A solução</div>
+          <p>Cada pessoa (ou funcionalidade) tem a <strong>sua própria branch</strong>. O <span class="ci">main</span> só recebe código pronto e revisado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 4: O que é uma branch? ── -->
+<div class="s" id="s4">
+  <div class="content">
+    <div class="eyebrow">Conceito</div>
+    <h2 class="sh">Branch = <span class="ac">linha do tempo</span> alternativa</h2>
+    <p class="lead">Uma branch é um ponteiro para um commit específico. Criar uma branch não copia código — é apenas um novo caminho a partir de um ponto.</p>
+    <div class="bdiag">
+      <div><span class="m">●</span>──<span class="m">●</span>──<span class="m">●</span>──────────────────────────<span class="m">●</span> <span class="h">← main (HEAD)</span></div>
+      <div><span class="l">         </span>│<span class="l">  (branch criada aqui)</span></div>
+      <div><span class="l">         </span>└──<span class="f">●</span>──<span class="f">●</span>──<span class="f">●</span> <span class="h">← feature/mapa-ods</span></div>
+    </div>
+    <div class="two" style="margin-top:8px;">
+      <ul class="pts">
+        <li>A branch <span class="ci">main</span> (ou <span class="ci">master</span>) é a <strong>linha principal e estável</strong> do projeto</li>
+        <li>Você cria branches para <strong>funcionalidades, correções ou experimentos</strong></li>
+        <li>Cada branch <strong>evolui independentemente</strong> até ser integrada de volta</li>
+      </ul>
+      <div class="ib ib-gr">
+        <div class="ibl">🌿 Por que Git é tão rápido?</div>
+        <p>Branches no Git são apenas um arquivo de 41 bytes (o hash do commit). Criar uma branch é <strong>instantâneo</strong>, diferente de outros sistemas que copiavam arquivos.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 5: git branch ── -->
+<div class="s" id="s5">
+  <div class="content">
+    <div class="eyebrow">Comandos</div>
+    <h2 class="sh"><span class="ac">git branch</span> — Criar e gerenciar</h2>
+    <div class="term">
+      <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">bash — git branch</span></div>
+      <div class="tb2">
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> branch</span></div>
+        <div class="out ok">* main</div>
+        <div class="out bl">&nbsp;&nbsp;feature/mapa-ods</div>
+        <div class="out bl">&nbsp;&nbsp;fix/corrige-login</div>
+        <div class="out tc"># Asterisco (*) indica a branch atual</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> branch feature/nova-funcionalidade</span></div>
+        <div class="out tc"># Cria a branch (mas NÃO muda para ela)</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> branch <span class="fl">-d</span> feature/nova-funcionalidade</span></div>
+        <div class="out ok">Deleted branch feature/nova-funcionalidade (was a1b2c3d).</div>
+        <div class="out tc"># -d deleta branch já mesclada · -D força deleção</div>
+        <div class="tsep"></div>
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> branch <span class="fl">-a</span></span></div>
+        <div class="out tc"># Lista todas, incluindo branches remotas</div>
+      </div>
+    </div>
+    <div class="ib ib-yw">
+      <div class="ibl">⚠️ -d vs -D</div>
+      <p>Use <strong>-d</strong> (minúsculo) para deletar branches já mescladas — o Git avisa se você tentar apagar algo não integrado. Use <strong>-D</strong> somente se tiver certeza de que não precisa mais dos commits.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 6: git switch ── -->
+<div class="s" id="s6">
+  <div class="content">
+    <div class="eyebrow">Navegação</div>
+    <h2 class="sh"><span class="ac">git switch</span> — Mudar de branch</h2>
+    <div class="two">
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Comando moderno (Git 2.23+):</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git switch</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch feature/mapa-ods</span></div>
+            <div class="out ok">Switched to branch 'feature/mapa-ods'</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch <span class="fl">-c</span> feature/nova</span></div>
+            <div class="out ok">Switched to a new branch 'feature/nova'</div>
+            <div class="out tc"># -c = criar E mudar em um só comando</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch main</span></div>
+            <div class="out ok">Switched to branch 'main'</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch <span class="fl">-</span></span></div>
+            <div class="out tc"># Volta para a branch anterior (atalho útil!)</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Comando legado (ainda funciona):</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">git checkout (legado)</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> checkout feature/mapa-ods</span></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> checkout <span class="fl">-b</span> feature/nova</span></div>
+            <div class="out tc"># Equivalente a switch -c</div>
+          </div>
+        </div>
+        <div class="ib ib-bl">
+          <div class="ibl">💡 Use git switch</div>
+          <p><strong>git checkout</strong> é legado e faz coisas demais (muda branches E restaura arquivos). Prefira <strong>git switch</strong> para branches e <strong>git restore</strong> para arquivos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 7: Nomenclatura ── -->
+<div class="s" id="s7">
+  <div class="content wide">
+    <div class="eyebrow">Boas Práticas</div>
+    <h2 class="sh">Nomenclatura de <span class="ac">branches</span></h2>
+    <p class="lead">O nome da branch deve comunicar <strong>tipo, contexto e intenção</strong> — sem precisar abrir o código.</p>
+    <table class="ntable">
+      <thead><tr><th>Prefixo</th><th>Para que serve</th><th>Exemplos no Projeto ODS</th></tr></thead>
+      <tbody>
+        <tr><td><span class="nbadge nf">feature/</span></td><td style="color:var(--mu);font-size:13px;">Nova funcionalidade</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);">feature/mapa-impacto-ods<br>feature/dashboard-metas</td></tr>
+        <tr><td><span class="nbadge nfx">fix/</span></td><td style="color:var(--mu);font-size:13px;">Correção de bug</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);">fix/calculo-indicador<br>fix/login-token-expirado</td></tr>
+        <tr><td><span class="nbadge nd">docs/</span></td><td style="color:var(--mu);font-size:13px;">Somente documentação</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);">docs/guia-contribuicao<br>docs/atualiza-readme</td></tr>
+        <tr><td><span class="nbadge nh">hotfix/</span></td><td style="color:var(--mu);font-size:13px;">Correção urgente em produção</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);">hotfix/seguranca-csrf<br>hotfix/api-fora-do-ar</td></tr>
+        <tr><td><span class="nbadge nr">release/</span></td><td style="color:var(--mu);font-size:13px;">Preparar uma versão</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);">release/v1.0.0<br>release/v2.1-sprint-3</td></tr>
+      </tbody>
+    </table>
+    <div class="ib ib-gr" style="margin-top:14px;">
+      <div class="ibl">✅ Regras de ouro</div>
+      <p>Use <strong>kebab-case</strong> (hífens, sem espaços), sempre em <strong>minúsculas</strong>, sem acentos ou caracteres especiais. Ex: <span class="ci">feature/mapa-ods-interativo</span> ✅ &nbsp; <span style="color:var(--rd);">feature/Mapa ODS</span> ❌</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 8: Fluxo completo ── -->
+<div class="s" id="s8">
+  <div class="content">
+    <div class="eyebrow">Feature Branch Flow</div>
+    <h2 class="sh">O fluxo <span class="ac">completo</span> de uma feature</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="snum">01</div>
+        <div><div class="scmd">git switch -c feature/mapa-ods</div><div class="sdesc">Cria e já muda para a nova branch a partir do main atual.</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">02</div>
+        <div><div class="scmd">git add . &amp;&amp; git commit -m "feat: adiciona mapa base"</div><div class="sdesc">Trabalha e cria commits semânticos normalmente na sua branch.</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">03</div>
+        <div><div class="scmd">git switch main</div><div class="sdesc">Volta para main quando a funcionalidade estiver pronta e testada.</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">04</div>
+        <div><div class="scmd">git merge feature/mapa-ods</div><div class="sdesc">Incorpora os commits da feature branch no main.</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">05</div>
+        <div><div class="scmd">git branch -d feature/mapa-ods</div><div class="sdesc">Limpa a branch após o merge (opcional, mas recomendado).</div></div>
+      </div>
+    </div>
+    <div class="ib ib-bl">
+      <div class="ibl">🔄 Na prática com GitHub</div>
+      <p>No projeto ODS, o merge não vai acontecer localmente assim — você vai abrir um <strong>Pull Request</strong> para que um colega revise o código. Veremos isso na Aula 3.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 9: Merge fast-forward ── -->
+<div class="s" id="s9">
+  <div class="content">
+    <div class="eyebrow">Integrando Branches</div>
+    <h2 class="sh"><span class="ac">git merge</span> — Fast-forward</h2>
+    <div class="two">
+      <div>
+        <p class="lead">Acontece quando <strong>main não teve nenhum commit novo</strong> desde que a branch foi criada. O Git simplesmente "avança" o ponteiro.</p>
+        <div class="bdiag" style="font-size:12px;">
+          <div><span style="color:var(--mu);">Antes:</span></div>
+          <div><span class="m">●──●</span><span class="l"> (main)</span></div>
+          <div><span class="l">     </span>└──<span class="f">●──●</span><span class="l"> (feature)</span></div>
+          <br>
+          <div><span style="color:var(--mu);">Depois do merge:</span></div>
+          <div><span class="m">●──●──●──●</span> <span class="h">(main + feature, sem merge commit)</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">fast-forward merge</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> switch main</span></div>
+            <div class="out ok">Switched to branch 'main'</div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> merge feature/mapa-ods</span></div>
+            <div class="out ok">Updating a1b2c3d..e4f5g6h</div>
+            <div class="out ok">Fast-forward</div>
+            <div class="out ok">&nbsp;mapa.html | 42 +++++++++++++</div>
+          </div>
+        </div>
+        <div class="ib ib-gr">
+          <div class="ibl">✅ Mais limpo</div>
+          <p>O fast-forward gera um histórico linear, sem commits de merge extras. Ideal para features pequenas e isoladas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 10: Merge commit ── -->
+<div class="s" id="s10">
+  <div class="content">
+    <div class="eyebrow">Integrando Branches</div>
+    <h2 class="sh"><span class="ac">git merge</span> — Merge commit</h2>
+    <div class="two">
+      <div>
+        <p class="lead">Acontece quando <strong>main também teve commits</strong> enquanto a feature estava sendo desenvolvida. O Git cria um commit de merge para unir as duas histórias.</p>
+        <div class="bdiag" style="font-size:12px;">
+          <div><span style="color:var(--mu);">Situação:</span></div>
+          <div><span class="m">●──●──●</span><span class="l"> (main com novos commits)</span></div>
+          <div><span class="l">   </span>└──<span class="f">●──●</span><span class="l"> (feature)</span></div>
+          <br>
+          <div><span style="color:var(--mu);">Após merge:</span></div>
+          <div><span class="m">●──●──●────●</span> <span class="h">(merge commit)</span></div>
+          <div><span class="l">   </span>└──<span class="f">●──●</span><span class="l">──/</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">merge commit</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> merge feature/mapa-ods</span></div>
+            <div class="out">Merge made by the 'ort' strategy.</div>
+            <div class="out ok">&nbsp;mapa.html | 42 ++++++++++</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> log <span class="fl">--oneline</span></span></div>
+            <div class="out ok">c3f9a1b Merge branch 'feature/mapa-ods'</div>
+            <div class="out ok">8d2e104 fix: corrige api de metas</div>
+            <div class="out bl">5a7b3c9 feat: mapa interativo</div>
+          </div>
+        </div>
+        <div class="ib ib-yw">
+          <div class="ibl">💡 Conflito possível</div>
+          <p>Se as duas branches alteraram o <strong>mesmo trecho</strong> de um arquivo, o Git vai pausar e pedir que você resolva o conflito manualmente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 11: Conflitos ── -->
+<div class="s" id="s11">
+  <div class="content">
+    <div class="eyebrow">Resolvendo Conflitos</div>
+    <h2 class="sh">Conflitos: o Git pedindo <span class="ac">ajuda</span></h2>
+    <p class="lead">Um conflito acontece quando <strong>duas branches alteraram as mesmas linhas</strong> de um arquivo. O Git não sabe qual versão é a "certa" — você decide.</p>
+    <p style="font-size:13px;color:var(--mu);margin-bottom:10px;">O Git marca o arquivo com delimitadores de conflito:</p>
+    <div class="conflict">
+      <div style="color:var(--mu);">&lt;!-- index.html --&gt;</div>
+      <br>
+      <div class="cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</div>
+      <div class="code">&nbsp;&nbsp;&lt;h1&gt;Página Inicial do Projeto ODS&lt;/h1&gt;</div>
+      <div class="cm">=======</div>
+      <div class="cb">&nbsp;&nbsp;&lt;h1&gt;Bem-vindo ao Projeto de Sustentabilidade&lt;/h1&gt;</div>
+      <div class="cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/titulo-pagina</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
+      <div class="ib ib-rd" style="margin-top:0;"><div class="ibl">❌ &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</div><p>Código da branch atual (main)</p></div>
+      <div class="ib ib-yw" style="margin-top:0;"><div class="ibl">── =======</div><p>Separador entre as versões conflitantes</p></div>
+      <div class="ib ib-bl" style="margin-top:0;"><div class="ibl">✎ &gt;&gt;&gt;&gt;&gt;&gt;&gt;</div><p>Código da branch que está sendo mesclada</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 12: Resolvendo conflitos ── -->
+<div class="s" id="s12">
+  <div class="content">
+    <div class="eyebrow">Passo a Passo</div>
+    <h2 class="sh">Como <span class="ac">resolver</span> um conflito</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="snum">01</div>
+        <div><div class="scmd">git status</div><div class="sdesc">Identifica quais arquivos estão em conflito — marcados como "both modified".</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">02</div>
+        <div><div class="scmd">Abra o arquivo no VS Code</div><div class="sdesc">O editor destaca visualmente os conflitos com botões "Accept Current", "Accept Incoming" ou "Accept Both".</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">03</div>
+        <div><div class="scmd">Edite manualmente</div><div class="sdesc">Decida qual código manter. Remova os marcadores (&lt;&lt;&lt;, ===, &gt;&gt;&gt;) e deixe apenas o código final correto.</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">04</div>
+        <div><div class="scmd">git add index.html</div><div class="sdesc">Marca o conflito como resolvido adicionando o arquivo à Staging Area.</div></div>
+      </div>
+      <div class="step">
+        <div class="snum">05</div>
+        <div><div class="scmd">git commit -m "fix: resolve conflito no título"</div><div class="sdesc">Finaliza o merge com um commit descritivo.</div></div>
+      </div>
+    </div>
+    <div class="ib ib-gr">
+      <div class="ibl">🛡️ Dica profissional</div>
+      <p>Faça <span class="ci">git pull</span> ou <span class="ci">git merge main</span> na sua feature branch <strong>com frequência</strong> para pegar as atualizações do main cedo, enquanto os conflitos são pequenos e fáceis de resolver.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 13: git log --graph ── -->
+<div class="s" id="s13">
+  <div class="content">
+    <div class="eyebrow">Visualizando o Histórico</div>
+    <h2 class="sh"><span class="ac">git log</span> — Vendo o grafo</h2>
+    <p class="lead">O comando mais poderoso para entender o histórico do projeto:</p>
+    <div class="term">
+      <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">bash — git log graph</span></div>
+      <div class="tb2">
+        <div class="tl"><span class="pr">$</span><span class="cm"><span class="kw">git</span> log <span class="fl">--oneline --graph --all --decorate</span></span></div>
+        <div class="out ok">*&nbsp;&nbsp; c3f9a1b (HEAD → main) Merge branch 'feature/mapa'</div>
+        <div class="out ok">|\&nbsp;</div>
+        <div class="out ok">| * 5a7b3c9 (feature/mapa) feat: adiciona camadas ODS</div>
+        <div class="out ok">| * 2f1d8e6 feat: mapa base com Leaflet</div>
+        <div class="out ok">|/</div>
+        <div class="out ok">*&nbsp;&nbsp; 8d2e104 Merge branch 'feature/auth'</div>
+        <div class="out ok">|\&nbsp;</div>
+        <div class="out bl">| * 9e4c2a7 (feature/auth) feat(auth): login com JWT</div>
+        <div class="out bl">| * 1b6d3f9 chore: instala dependências de auth</div>
+        <div class="out ok">|/</div>
+        <div class="out ok">* 0c5a8d2 chore: setup inicial do projeto</div>
+      </div>
+    </div>
+    <div class="ib ib-bl">
+      <div class="ibl">🔧 Alias útil</div>
+      <p>Configure um atalho: <span class="ci">git config --global alias.graph "log --oneline --graph --all --decorate"</span> — depois é só usar <span class="ci">git graph</span>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 14: Resumo ── -->
+<div class="s" id="s14">
+  <div class="content wide">
+    <div class="eyebrow">Resumo e Próximos Passos</div>
+    <h2 class="sh">O que você <span class="ac">domina</span> agora</h2>
+    <div class="sgrid">
+      <div class="sc2"><div class="sn2">01</div><div class="sm">git branch</div><div class="sd2">Cria, lista e deleta branches do repositório.</div></div>
+      <div class="sc2"><div class="sn2">02</div><div class="sm">git switch -c</div><div class="sd2">Cria e muda para uma nova branch em um único comando.</div></div>
+      <div class="sc2"><div class="sn2">03</div><div class="sm">nomenclatura</div><div class="sd2">feature/ · fix/ · docs/ · hotfix/ · release/ com kebab-case.</div></div>
+      <div class="sc2"><div class="sn2">04</div><div class="sm">git merge</div><div class="sd2">Integra branches (fast-forward ou merge commit dependendo do histórico).</div></div>
+      <div class="sc2"><div class="sn2">05</div><div class="sm">conflitos</div><div class="sd2">Editar marcadores → git add → git commit para finalizar.</div></div>
+      <div class="sc2"><div class="sn2">06</div><div class="sm">git log --graph</div><div class="sd2">Visualiza a árvore completa de branches e merges do projeto.</div></div>
+    </div>
+    <div class="ib ib-bl" style="margin-top:14px;">
+      <div class="ibl">📚 Próxima Aula — GitHub: Colaboração Profissional</div>
+      <p>Conectar o repositório ao GitHub, sincronizar com a equipe e abrir seu primeiro <strong>Pull Request</strong> para que os colegas revisem o código antes do merge.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="nav">
+  <button class="nb" id="bp" onclick="go(-1)" disabled>←</button>
+  <span id="ctr">1 / 14</span>
+  <button class="nb" id="bn" onclick="go(1)">→</button>
+</div>
+<div class="kbhint"><kbd>←</kbd> <kbd>→</kbd></div>
+<script>
+const T=14; let cur=1;
+function go(d){
+  const n=cur+d; if(n<1||n>T)return;
+  const oe=document.getElementById('s'+cur), ne=document.getElementById('s'+n);
+  oe.classList.remove('on','back'); ne.classList.remove('back');
+  if(d<0) ne.classList.add('back');
+  ne.classList.add('on'); cur=n; up();
+}
+function up(){
+  document.getElementById('ctr').textContent=cur+' / '+T;
+  document.getElementById('bp').disabled=cur===1;
+  document.getElementById('bn').disabled=cur===T;
+  document.getElementById('progress').style.width=(cur/T*100)+'%';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+up();
+</script>
+</body>
+</html>

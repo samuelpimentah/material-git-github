@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Caderno de Exercícios — Git & GitHub Profissional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1117;--sf:#161B22;--sf2:#21262D;--bd:#30363D;--tx:#E6EDF3;--mu:#8B949E;
+  --gr:#3FB950;--bl:#58A6FF;--pu:#BC8CFF;--or:#F0883E;--yw:#D29922;--rd:#F85149;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;}
+a{color:var(--bl);text-decoration:none;}
+
+/* ── Header ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 48px;
+  border-bottom:1px solid var(--bd);position:sticky;top:0;background:rgba(13,17,23,.95);
+  backdrop-filter:blur(12px);z-index:50;}
+.logo{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gr);}
+.back-link{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);
+  padding:6px 12px;border-radius:6px;border:1px solid var(--bd);transition:.2s;}
+.back-link:hover{color:var(--tx);background:var(--sf2);}
+
+/* ── Tabs ── */
+.tabs-wrap{background:var(--sf);border-bottom:1px solid var(--bd);position:sticky;top:57px;z-index:40;}
+.tabs{display:flex;gap:0;max-width:1100px;margin:0 auto;padding:0 48px;}
+.tab{font-family:'JetBrains Mono',monospace;font-size:13px;padding:16px 24px;cursor:pointer;
+  color:var(--mu);border-bottom:2px solid transparent;transition:.2s;white-space:nowrap;}
+.tab:hover{color:var(--tx);}
+.tab.a1.active{color:var(--gr);border-color:var(--gr);}
+.tab.a2.active{color:var(--bl);border-color:var(--bl);}
+.tab.a3.active{color:var(--pu);border-color:var(--pu);}
+.tab.af.active{color:var(--yw);border-color:var(--yw);}
+
+/* ── Panels ── */
+.panel{display:none;max-width:1100px;margin:0 auto;padding:48px 48px 80px;}
+.panel.active{display:block;}
+
+/* ── Section header ── */
+.sec-header{margin-bottom:36px;}
+.sec-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:10px;}
+.sec-eyebrow.g{color:var(--gr);}
+.sec-eyebrow.b{color:var(--bl);}
+.sec-eyebrow.p{color:var(--pu);}
+.sec-eyebrow.y{color:var(--yw);}
+.sec-title{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;margin-bottom:10px;}
+.sec-desc{font-size:15px;color:var(--mu);line-height:1.7;max-width:700px;}
+.sec-desc strong{color:var(--tx);}
+
+/* ── Difficulty section ── */
+.diff-section{margin-bottom:44px;}
+.diff-label{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.diff-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.08em;}
+.d-easy{background:rgba(63,185,80,.15);color:var(--gr);border:1px solid rgba(63,185,80,.3);}
+.d-medium{background:rgba(210,153,34,.15);color:var(--yw);border:1px solid rgba(210,153,34,.3);}
+.d-hard{background:rgba(248,81,73,.15);color:var(--rd);border:1px solid rgba(248,81,73,.3);}
+.diff-line{flex:1;height:1px;background:var(--bd);}
+
+/* ── Exercise card ── */
+.ex-grid{display:grid;gap:16px;}
+.ex-grid.cols2{grid-template-columns:1fr 1fr;}
+.ex-card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden;transition:.2s;}
+.ex-card:hover{border-color:var(--bd);box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.ex-card-header{padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--bd);}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;flex-shrink:0;margin-top:3px;}
+.ex-num.eg{color:var(--gr);}
+.ex-num.em{color:var(--yw);}
+.ex-num.eh{color:var(--rd);}
+.ex-title{font-weight:600;font-size:15px;line-height:1.4;}
+.ex-card-body{padding:16px 20px;}
+.ex-objective{font-size:14px;color:var(--mu);margin-bottom:14px;line-height:1.6;}
+.ex-objective strong{color:var(--tx);}
+
+/* ── Exercise steps ── */
+.ex-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.ex-step{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--mu);line-height:1.5;}
+.ex-step .sn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);
+  background:var(--sf2);border:1px solid var(--bd);border-radius:4px;
+  padding:1px 6px;flex-shrink:0;margin-top:1px;}
+
+/* ── Inline code / terminal ── */
+.ci{font-family:'JetBrains Mono',monospace;background:var(--sf2);border:1px solid var(--bd);
+  border-radius:4px;padding:1px 6px;font-size:.85em;color:var(--or);}
+.mini-term{background:#010409;border:1px solid var(--bd);border-radius:8px;
+  padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  line-height:1.8;margin:10px 0;}
+.mini-term .pr{color:var(--gr);user-select:none;}
+.mini-term .kw{color:var(--or);}
+.mini-term .fl{color:var(--bl);}
+.mini-term .st{color:var(--yw);}
+.mini-term .cm{color:var(--mu);font-size:11px;}
+
+/* ── Expected result ── */
+.ex-result{background:rgba(63,185,80,.05);border:1px solid rgba(63,185,80,.2);
+  border-radius:6px;padding:10px 14px;margin-top:10px;}
+.ex-result .rl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gr);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.ex-result p{font-size:13px;color:var(--mu);line-height:1.5;}
+.ex-result p strong{color:var(--tx);}
+.ex-result.hard{background:rgba(248,81,73,.05);border-color:rgba(248,81,73,.2);}
+.ex-result.hard .rl{color:var(--rd);}
+.ex-result.mid{background:rgba(210,153,34,.05);border-color:rgba(210,153,34,.2);}
+.ex-result.mid .rl{color:var(--yw);}
+
+/* ── Tip box ── */
+.tip{background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.2);
+  border-radius:6px;padding:10px 14px;margin-top:10px;font-size:13px;color:var(--mu);line-height:1.5;}
+.tip .tip-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bl);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.tip strong{color:var(--tx);}
+
+/* ── Challenge panel ── */
+.challenge-hero{background:linear-gradient(135deg,rgba(210,153,34,.08),rgba(188,140,255,.08));
+  border:1px solid rgba(210,153,34,.2);border-radius:12px;padding:32px;margin-bottom:36px;}
+.ch-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yw);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
+.ch-title{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;margin-bottom:12px;}
+.ch-desc{font-size:15px;color:var(--mu);line-height:1.7;max-width:700px;}
+.ch-desc strong{color:var(--tx);}
+.ch-meta{display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;}
+.ch-tag{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);
+  background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:4px 10px;}
+
+/* ── Challenge sections ── */
+.ch-section{margin-bottom:36px;}
+.ch-section-title{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;
+  color:var(--yw);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:10px;}
+.ch-steps{display:flex;flex-direction:column;gap:10px;}
+.ch-step{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:16px 20px;
+  display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:start;}
+.ch-step-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  color:var(--yw);background:rgba(210,153,34,.1);border:1px solid rgba(210,153,34,.2);
+  border-radius:6px;padding:4px 8px;text-align:center;}
+.ch-step-title{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--tx);}
+.ch-step-desc{font-size:13px;color:var(--mu);line-height:1.5;}
+.ch-step-desc strong{color:var(--tx);}
+
+/* ── Criteria grid ── */
+.crit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;}
+.crit-card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:16px;}
+.crit-card .cc-icon{font-size:22px;margin-bottom:8px;}
+.crit-card .cc-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  color:var(--tx);margin-bottom:8px;}
+.crit-card ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.crit-card ul li{font-size:12px;color:var(--mu);display:flex;align-items:flex-start;gap:6px;}
+.crit-card ul li::before{content:'·';color:var(--yw);flex-shrink:0;}
+
+/* ── PR Template block ── */
+.pr-template{background:#010409;border:1px solid var(--bd);border-radius:10px;
+  padding:20px 24px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;}
+.pth{color:var(--yw);}
+.ptc{color:var(--mu);}
+.ptb{color:var(--tx);}
+.ptl{color:var(--bl);}
+
+@media(max-width:768px){
+  header,.tabs,.panel{padding-left:20px;padding-right:20px;}
+  .ex-grid.cols2{grid-template-columns:1fr;}
+  .crit-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">// caderno de exercícios · git &amp; github profissional</div>
+  <a href="index.html" class="back-link">← Menu</a>
+</header>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab a1 active" onclick="showTab('a1')">📘 Aula 01 · Git Essencial</div>
+    <div class="tab a2" onclick="showTab('a2')">🌿 Aula 02 · Branches</div>
+    <div class="tab a3" onclick="showTab('a3')">🔮 Aula 03 · GitHub</div>
+    <div class="tab af" onclick="showTab('af')">🏆 Desafio Final</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAINEL: AULA 01
+══════════════════════════════ -->
+<div class="panel active" id="panel-a1">
+  <div class="sec-header">
+    <div class="sec-eyebrow g">Aula 01 · Git Essencial</div>
+    <div class="sec-title">Exercícios Práticos</div>
+    <p class="sec-desc">Pratique os comandos aprendidos em sala. Complete todos os exercícios antes da Aula 02. Dica: sempre use <strong>git status</strong> entre os comandos para observar o que está acontecendo.</p>
+  </div>
+
+  <!-- FÁCIL -->
+  <div class="diff-section">
+    <div class="diff-label">
+      <span class="diff-badge d-easy">Fácil</span>
+      <div class="diff-line"></div>
+    </div>
+    <div class="ex-grid cols2">
+
+      <div class="ex-card">
+        <div class="ex-card-header">
+          <span class="ex-num eg">EX-01</span>
+          <div class="ex-title">Configurando sua identidade</div>
+        </div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Configure o Git com suas informações reais e verifique o resultado.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Configure seu nome completo com <span class="ci">git config --global user.name</span></div>
+            <div class="ex-step"><span class="sn">2</span>Configure seu email institucional com <span class="ci">git config --global user.email</span></div>
+            <div class="ex-step"><span class="sn">3</span>Configure o VS Code como editor padrão com <span class="ci">core.editor "code --wait"</span></div>
+            <div class="ex-step"><span class="sn">4</span>Execute <span class="ci">git config --list</span> e confirme que as três configurações aparecem.</div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p><strong>git config --list</strong> deve exibir <strong>user.name</strong>, <strong>user.email</strong> e <strong>core.editor</strong> com seus valores.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header">
+          <span class="ex-num eg">EX-02</span>
+          <div class="ex-title">Primeiro repositório e commit</div>
+        </div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Crie um repositório do zero e faça seu primeiro commit semântico.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Crie uma pasta <span class="ci">projeto-ods</span> e entre nela</div>
+            <div class="ex-step"><span class="sn">2</span>Execute <span class="ci">git init</span> e verifique a pasta <span class="ci">.git/</span> criada</div>
+            <div class="ex-step"><span class="sn">3</span>Crie um arquivo <span class="ci">README.md</span> com o nome do projeto e uma descrição</div>
+            <div class="ex-step"><span class="sn">4</span>Use <span class="ci">git add README.md</span> e depois <span class="ci">git status</span></div>
+            <div class="ex-step"><span class="sn">5</span>Faça o commit: <span class="ci">git commit -m "docs: adiciona README inicial"</span></div>
+            <div class="ex-step"><span class="sn">6</span>Confira com <span class="ci">git log --oneline</span></div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p><strong>git log --oneline</strong> mostra 1 commit com a mensagem semântica correta.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header">
+          <span class="ex-num eg">EX-03</span>
+          <div class="ex-title">Commits semânticos variados</div>
+        </div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Pratique usar tipos diferentes de commits semânticos em um projeto real.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>No <span class="ci">projeto-ods</span>, crie os arquivos <span class="ci">index.html</span> e <span class="ci">styles.css</span></div>
+            <div class="ex-step"><span class="sn">2</span>Commit do HTML: <span class="ci">"feat: cria estrutura HTML da página inicial"</span></div>
+            <div class="ex-step"><span class="sn">3</span>Commit do CSS: <span class="ci">"style: adiciona estilos base da página"</span></div>
+            <div class="ex-step"><span class="sn">4</span>Adicione um comentário ao HTML e commit: <span class="ci">"docs: documenta seções do HTML"</span></div>
+            <div class="ex-step"><span class="sn">5</span>Corrija um erro de digitação qualquer: <span class="ci">"fix: corrige typo no título"</span></div>
+            <div class="ex-step"><span class="sn">6</span>Visualize com <span class="ci">git log --oneline</span></div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Histórico com ao menos <strong>5 commits</strong>, todos com tipos semânticos diferentes e descrições claras.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MÉDIO -->
+  <div class="diff-section">
+    <div class="diff-label">
+      <span class="diff-badge d-medium">Médio</span>
+      <div class="diff-line"></div>
+    </div>
+    <div class="ex-grid cols2">
+
+      <div class="ex-card">
+        <div class="ex-card-header">
+          <span class="ex-num em">EX-04</span>
+          <div class="ex-title">Add seletivo e Staging Area estratégica</div>
+        </div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Pratique adicionar arquivos seletivamente, criando commits coesos e bem separados.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Modifique simultaneamente: <span class="ci">index.html</span>, <span class="ci">styles.css</span> e crie <span class="ci">script.js</span></div>
+            <div class="ex-step"><span class="sn">2</span>Adicione <strong>somente</strong> o <span class="ci">script.js</span> ao staging</div>
+            <div class="ex-step"><span class="sn">3</span>Verifique que o <span class="ci">git status</span> mostra staged e unstaged corretamente</div>
+            <div class="ex-step"><span class="sn">4</span>Commit: <span class="ci">"feat: adiciona funcionalidade JavaScript"</span></div>
+            <div class="ex-step"><span class="sn">5</span>Agora adicione as mudanças de HTML e CSS juntas e faça 1 commit</div>
+            <div class="ex-step"><span class="sn">6</span>Explique (em comentário ou papel): por que separar esses commits é melhor?</div>
+          </div>
+          <div class="ex-result mid">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Dois commits separados, cada um com contexto claro. O <strong>git log</strong> conta uma história coerente.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header">
+          <span class="ex-num em">EX-05</span>
+          <div class="ex-title">Desfazendo com git reset</div>
+        </div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Pratique os três modos do git reset e observe as diferenças.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Crie 2 novos arquivos e faça 2 commits (um por arquivo)</div>
+            <div class="ex-step"><span class="sn">2</span>Use <span class="ci">git reset --soft HEAD~1</span> — observe o git status</div>
+            <div class="ex-step"><span class="sn">3</span>Refaça o commit com uma mensagem melhor</div>
+            <div class="ex-step"><span class="sn">4</span>Crie mais 1 commit qualquer</div>
+            <div class="ex-step"><span class="sn">5</span>Use <span class="ci">git reset --mixed HEAD~1</span> — observe a diferença no git status</div>
+            <div class="ex-step"><span class="sn">6</span>Documente (comentário): qual a diferença prática entre --soft e --mixed?</div>
+          </div>
+          <div class="mini-term">
+            <div><span class="pr">$</span> <span class="kw">git</span> log --oneline <span class="cm"># antes</span></div>
+            <div><span class="pr">$</span> <span class="kw">git</span> reset --soft HEAD~1</div>
+            <div><span class="pr">$</span> <span class="kw">git</span> status <span class="cm"># compare!</span></div>
+          </div>
+          <div class="ex-result mid">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Entender claramente quando usar <strong>--soft</strong> (refazer mensagem) vs <strong>--mixed</strong> (reestruturar commits).</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DIFÍCIL -->
+  <div class="diff-section">
+    <div class="diff-label">
+      <span class="diff-badge d-hard">Difícil</span>
+      <div class="diff-line"></div>
+    </div>
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ex-card-header">
+          <span class="ex-num eh">EX-06</span>
+          <div class="ex-title">Squash manual de commits com git reset</div>
+        </div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Você fez 4 commits pequenos que deveriam ser 1 commit único e bem descrito. Use git reset para consolidá-los sem perder o código.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Crie uma sequência de 4 commits temáticos mas fragmentados, ex: "wip", "corrige", "esqueci disso", "pronto agora"</div>
+            <div class="ex-step"><span class="sn">2</span>Use <span class="ci">git log --oneline</span> para confirmar os 4 commits</div>
+            <div class="ex-step"><span class="sn">3</span>Execute <span class="ci">git reset --soft HEAD~4</span> para desfazê-los mantendo os arquivos staged</div>
+            <div class="ex-step"><span class="sn">4</span>Verifique com <span class="ci">git status</span> que todas as mudanças ainda estão na Staging Area</div>
+            <div class="ex-step"><span class="sn">5</span>Crie <strong>1 único commit</strong> com uma mensagem semântica profissional que descreve todas as mudanças</div>
+            <div class="ex-step"><span class="sn">6</span>Confirme: <span class="ci">git log --oneline</span> mostra apenas 1 commit no lugar dos 4 anteriores</div>
+          </div>
+          <div class="tip">
+            <div class="tip-label">💡 Por que isso é importante?</div>
+            Antes de abrir um PR profissional, é comum "limpar" commits de desenvolvimento em poucos commits coesos. Isso é chamado de <strong>squash</strong> — você fará isso com frequência no projeto ODS.
+          </div>
+          <div class="ex-result hard">
+            <div class="rl">⚡ Desafio extra</div>
+            <p>Tente consolidar os 4 commits em <strong>2 commits</strong> lógicos em vez de 1. Use <span class="ci">git add</span> seletivo após o reset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAINEL: AULA 02
+══════════════════════════════ -->
+<div class="panel" id="panel-a2">
+  <div class="sec-header">
+    <div class="sec-eyebrow b">Aula 02 · Branches</div>
+    <div class="sec-title">Exercícios Práticos</div>
+    <p class="sec-desc">Pratique o fluxo de branches individualmente e, nos exercícios médio e difícil, simule colaboração com <strong>um colega de turma</strong> — combinando quem faz cada etapa.</p>
+  </div>
+
+  <!-- FÁCIL -->
+  <div class="diff-section">
+    <div class="diff-label"><span class="diff-badge d-easy">Fácil</span><div class="diff-line"></div></div>
+    <div class="ex-grid cols2">
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eg">EX-01</span><div class="ex-title">Primeiro ciclo de feature branch</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Execute o fluxo completo de uma branch de feature do início ao fim.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>No <span class="ci">projeto-ods</span>, crie e entre na branch <span class="ci">feature/sobre-o-projeto</span></div>
+            <div class="ex-step"><span class="sn">2</span>Crie o arquivo <span class="ci">sobre.html</span> com algum conteúdo</div>
+            <div class="ex-step"><span class="sn">3</span>Faça 2 commits semânticos nessa branch</div>
+            <div class="ex-step"><span class="sn">4</span>Volte para o <span class="ci">main</span> e verifique que o <span class="ci">sobre.html</span> <strong>não existe</strong> nele</div>
+            <div class="ex-step"><span class="sn">5</span>Faça o merge: <span class="ci">git merge feature/sobre-o-projeto</span></div>
+            <div class="ex-step"><span class="sn">6</span>Confirme que o arquivo agora existe no main. Delete a branch com <span class="ci">-d</span></div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>O arquivo aparece no main após o merge. O <strong>git log --oneline</strong> mostra os commits que vieram da feature branch.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eg">EX-02</span><div class="ex-title">Nomenclatura e navegação entre branches</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Pratique criar branches com nomenclatura correta e navegar entre elas.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>A partir do main, crie 4 branches: <span class="ci">feature/mapa-ods</span>, <span class="ci">fix/calculo-meta</span>, <span class="ci">docs/guia-contribuicao</span>, <span class="ci">hotfix/seguranca-csrf</span></div>
+            <div class="ex-step"><span class="sn">2</span>Liste todas as branches com <span class="ci">git branch</span></div>
+            <div class="ex-step"><span class="sn">3</span>Navegue para cada uma e crie 1 arquivo diferente em cada</div>
+            <div class="ex-step"><span class="sn">4</span>Faça 1 commit em cada branch</div>
+            <div class="ex-step"><span class="sn">5</span>Tente criar uma branch com nome inválido: <span class="ci">feature/Mapa ODS</span> — o que acontece?</div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>4 branches com nomenclatura correta, cada uma com 1 arquivo e 1 commit. Branch com nome inválido gera erro.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eg">EX-03</span><div class="ex-title">Visualizando o grafo de branches</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Crie uma estrutura de branches e visualize o histórico em formato de grafo.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Faça 2 commits no main</div>
+            <div class="ex-step"><span class="sn">2</span>Crie e trabalhe em <span class="ci">feature/a</span> (2 commits), depois volte ao main</div>
+            <div class="ex-step"><span class="sn">3</span>Faça 1 commit no main</div>
+            <div class="ex-step"><span class="sn">4</span>Crie e trabalhe em <span class="ci">feature/b</span> (1 commit), volte ao main</div>
+            <div class="ex-step"><span class="sn">5</span>Merge da feature/a, depois merge da feature/b</div>
+            <div class="ex-step"><span class="sn">6</span>Execute <span class="ci">git log --oneline --graph --all --decorate</span></div>
+          </div>
+          <div class="mini-term">
+            <div><span class="pr">$</span> <span class="kw">git</span> log --oneline --graph --all --decorate</div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>O grafo mostra duas bifurcações e merges claramente, com os nomes das branches.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MÉDIO -->
+  <div class="diff-section">
+    <div class="diff-label"><span class="diff-badge d-medium">Médio</span><div class="diff-line"></div></div>
+    <div class="ex-grid cols2">
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num em">EX-04</span><div class="ex-title">Fast-forward vs Merge Commit</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Provoque os dois tipos de merge e compare o histórico resultante.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span><strong>Fast-forward:</strong> Crie <span class="ci">feature/ff</span> a partir do main atual. Faça 2 commits nela. <strong>Não</strong> faça nada no main enquanto isso. Volte ao main e faça o merge.</div>
+            <div class="ex-step"><span class="sn">2</span>Observe o git log: sem merge commit, histórico linear</div>
+            <div class="ex-step"><span class="sn">3</span><strong>Merge commit:</strong> Crie <span class="ci">feature/mc</span> a partir do main. Faça 1 commit nela. Volte ao main e faça mais 1 commit. Agora faça o merge.</div>
+            <div class="ex-step"><span class="sn">4</span>Observe o git log --graph: aparece o merge commit com dois pais</div>
+            <div class="ex-step"><span class="sn">5</span>Documente a diferença em um comentário no README</div>
+          </div>
+          <div class="ex-result mid">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Você consegue <strong>explicar quando cada tipo de merge ocorre</strong> e identificar a diferença no git log --graph.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num em">EX-05</span><div class="ex-title">Provocar e resolver um conflito (dupla)</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Em dupla, simulem a situação mais comum de conflito em projetos colaborativos.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Ambos partem do mesmo estado do <span class="ci">main</span></div>
+            <div class="ex-step"><span class="sn">2</span>Pessoa A: cria <span class="ci">feature/titulo-a</span> e altera a linha 1 do <span class="ci">index.html</span></div>
+            <div class="ex-step"><span class="sn">3</span>Pessoa B: cria <span class="ci">feature/titulo-b</span> e altera a <strong>mesma linha 1</strong> com texto diferente</div>
+            <div class="ex-step"><span class="sn">4</span>Merge da feature/titulo-a no main (sem conflito)</div>
+            <div class="ex-step"><span class="sn">5</span>Tente merge da feature/titulo-b — o conflito vai aparecer!</div>
+            <div class="ex-step"><span class="sn">6</span>Resolva o conflito juntos, mantendo o melhor dos dois textos</div>
+          </div>
+          <div class="ex-result mid">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Conflito resolvido com sucesso. O git log mostra o <strong>merge commit com dois pais</strong> corretamente.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DIFÍCIL -->
+  <div class="diff-section">
+    <div class="diff-label"><span class="diff-badge d-hard">Difícil</span><div class="diff-line"></div></div>
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eh">EX-06</span><div class="ex-title">Duas features paralelas com múltiplos conflitos (trio)</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Simule um cenário de desenvolvimento real com três pessoas em paralelo, com múltiplos conflitos para resolver.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Pessoa A (líder): fica no main e faz 2 commits adicionando estrutura base ao <span class="ci">index.html</span></div>
+            <div class="ex-step"><span class="sn">2</span>Pessoa B: cria <span class="ci">feature/header</span>, modifica a div de header do HTML e faz 3 commits</div>
+            <div class="ex-step"><span class="sn">3</span>Pessoa C: cria <span class="ci">feature/footer</span>, modifica a div de footer E uma linha do header. Faz 2 commits</div>
+            <div class="ex-step"><span class="sn">4</span>Pessoa A faz merge da feature/header → ok ou resolve conflitos</div>
+            <div class="ex-step"><span class="sn">5</span>Pessoa A faz merge da feature/footer → vai ter conflito no header!</div>
+            <div class="ex-step"><span class="sn">6</span>Resolvam juntos: decidam qual versão do header fica, mantenham o footer</div>
+            <div class="ex-step"><span class="sn">7</span>Resultado final: <span class="ci">git log --graph --oneline --all</span> mostrando tudo</div>
+          </div>
+          <div class="tip">
+            <div class="tip-label">💡 Reflexão pós-exercício</div>
+            Como a comunicação entre a equipe pode <strong>evitar conflitos</strong> antes mesmo de acontecerem? O que vocês combinariam de fazer diferente?
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAINEL: AULA 03
+══════════════════════════════ -->
+<div class="panel" id="panel-a3">
+  <div class="sec-header">
+    <div class="sec-eyebrow p">Aula 03 · GitHub</div>
+    <div class="sec-title">Exercícios Práticos</div>
+    <p class="sec-desc">Para esses exercícios, você precisará de uma <strong>conta no GitHub</strong>. Faça os exercícios em pares — um abre o PR, o outro faz o code review.</p>
+  </div>
+
+  <!-- FÁCIL -->
+  <div class="diff-section">
+    <div class="diff-label"><span class="diff-badge d-easy">Fácil</span><div class="diff-line"></div></div>
+    <div class="ex-grid cols2">
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eg">EX-01</span><div class="ex-title">Publicar repositório no GitHub</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Conecte seu repositório local ao GitHub e publique todos os commits.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Crie um repositório <strong>vazio</strong> no GitHub (sem README, sem .gitignore)</div>
+            <div class="ex-step"><span class="sn">2</span>Copie a URL HTTPS do repositório</div>
+            <div class="ex-step"><span class="sn">3</span>No terminal: <span class="ci">git remote add origin URL</span></div>
+            <div class="ex-step"><span class="sn">4</span>Execute <span class="ci">git remote -v</span> para confirmar a conexão</div>
+            <div class="ex-step"><span class="sn">5</span>Execute <span class="ci">git push -u origin main</span></div>
+            <div class="ex-step"><span class="sn">6</span>Acesse o repositório no GitHub e confirme que todos os commits estão visíveis</div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Repositório visível no GitHub com todo o histórico de commits da Aula 01 e 02.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eg">EX-02</span><div class="ex-title">Primeiro Pull Request</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Abra seu primeiro PR no GitHub com título profissional.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Crie localmente a branch <span class="ci">feature/contato</span> e adicione um arquivo <span class="ci">contato.html</span></div>
+            <div class="ex-step"><span class="sn">2</span>Faça 2 commits semânticos</div>
+            <div class="ex-step"><span class="sn">3</span>Execute <span class="ci">git push -u origin feature/contato</span></div>
+            <div class="ex-step"><span class="sn">4</span>No GitHub, clique em "Compare &amp; pull request"</div>
+            <div class="ex-step"><span class="sn">5</span>Defina o título: <span class="ci">feat(contato): adiciona página de contato</span></div>
+            <div class="ex-step"><span class="sn">6</span>Escreva uma descrição breve explicando o que o PR faz e por quê</div>
+            <div class="ex-step"><span class="sn">7</span>Adicione um colega como revisor e abra o PR</div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>PR aberto com título semântico correto, descrição e revisor adicionado.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eg">EX-03</span><div class="ex-title">Respondendo a um code review</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Pratique o ciclo completo de receber feedback e atualizar o PR.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>O colega revisor deve fazer <strong>pelo menos 2 comentários</strong> no PR do EX-02 pedindo melhorias</div>
+            <div class="ex-step"><span class="sn">2</span>Leia todos os comentários antes de fazer qualquer mudança</div>
+            <div class="ex-step"><span class="sn">3</span>Faça as mudanças solicitadas nos arquivos localmente</div>
+            <div class="ex-step"><span class="sn">4</span>Commit: <span class="ci">"fix(contato): aplica feedback do code review"</span></div>
+            <div class="ex-step"><span class="sn">5</span>Execute <span class="ci">git push</span> — o commit aparece automaticamente no PR</div>
+            <div class="ex-step"><span class="sn">6</span>Responda cada comentário no GitHub explicando o que foi feito</div>
+          </div>
+          <div class="ex-result">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>PR atualizado com novos commits. Todos os comentários respondidos. Revisor aprova.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MÉDIO -->
+  <div class="diff-section">
+    <div class="diff-label"><span class="diff-badge d-medium">Médio</span><div class="diff-line"></div></div>
+    <div class="ex-grid cols2">
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num em">EX-04</span><div class="ex-title">Clone, branch e PR completo</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Simule entrar em um projeto existente como novo contribuidor.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Clone o repositório do colega (não o seu!) com <span class="ci">git clone URL</span></div>
+            <div class="ex-step"><span class="sn">2</span>Crie a branch <span class="ci">feature/seu-nome/melhoria</span></div>
+            <div class="ex-step"><span class="sn">3</span>Faça uma melhoria real no projeto (adicione conteúdo, corrija algo)</div>
+            <div class="ex-step"><span class="sn">4</span>3 commits semânticos</div>
+            <div class="ex-step"><span class="sn">5</span>Push e abra PR com título profissional</div>
+            <div class="ex-step"><span class="sn">6</span>Preencha a descrição com: o quê foi feito, por quê e como testar</div>
+          </div>
+          <div class="ex-result mid">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>PR aberto no repositório do colega, com branch no padrão correto e descrição completa.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num em">EX-05</span><div class="ex-title">fetch, pull e resolução de divergência</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Pratique sincronizar com o remoto quando há commits divergentes.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span>Em dupla: Pessoa A e Pessoa B clonam o mesmo repositório</div>
+            <div class="ex-step"><span class="sn">2</span>Pessoa A faz 1 commit e push no main</div>
+            <div class="ex-step"><span class="sn">3</span>Pessoa B (sem fazer pull) faz 1 commit diferente no main local</div>
+            <div class="ex-step"><span class="sn">4</span>Pessoa B tenta <span class="ci">git push</span> — vai ser rejeitado. Leia o erro.</div>
+            <div class="ex-step"><span class="sn">5</span>Pessoa B executa <span class="ci">git fetch</span> e depois <span class="ci">git log HEAD..origin/main</span> para ver o que está no remoto</div>
+            <div class="ex-step"><span class="sn">6</span>Pessoa B executa <span class="ci">git pull</span>, resolve eventual conflito e faz push</div>
+          </div>
+          <div class="ex-result mid">
+            <div class="rl">✓ Resultado esperado</div>
+            <p>Entender por que o push foi rejeitado e como resolver com pull antes de tentar novamente.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DIFÍCIL -->
+  <div class="diff-section">
+    <div class="diff-label"><span class="diff-badge d-hard">Difícil</span><div class="diff-line"></div></div>
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ex-card-header"><span class="ex-num eh">EX-06</span><div class="ex-title">Fluxo profissional completo com review e CI (trio)</div></div>
+        <div class="ex-card-body">
+          <p class="ex-objective">Simule um sprint real: três pessoas, repositório compartilhado, dois PRs simultâneos com review cruzado.</p>
+          <div class="ex-steps">
+            <div class="ex-step"><span class="sn">1</span><strong>Setup:</strong> Pessoa A cria o repositório no GitHub como organização/dono, adiciona B e C como colaboradores</div>
+            <div class="ex-step"><span class="sn">2</span><strong>Paralelo:</strong> B trabalha em <span class="ci">feature/b/nova-secao</span> e C trabalha em <span class="ci">feature/c/menu-navegacao</span>, ambos em paralelo</div>
+            <div class="ex-step"><span class="sn">3</span><strong>PRs:</strong> Ambos abrem PRs ao mesmo tempo, pedindo review cruzado (B revisa C, C revisa B)</div>
+            <div class="ex-step"><span class="sn">4</span><strong>Reviews:</strong> Cada um faz pelo menos 2 comentários técnicos no PR do outro</div>
+            <div class="ex-step"><span class="sn">5</span><strong>Iteração:</strong> Ambos respondem aos comentários e fazem os ajustes com novos commits</div>
+            <div class="ex-step"><span class="sn">6</span><strong>Merge:</strong> A aprova e faz merge do PR de B. Isso pode gerar conflito no PR de C — resolvam!</div>
+            <div class="ex-step"><span class="sn">7</span>A aprova e faz merge do PR de C. Repositório final com ambas as features integradas.</div>
+          </div>
+          <div class="tip">
+            <div class="tip-label">💡 Bônus: GitHub Actions</div>
+            Se quiser ir além, configure um workflow simples em <strong>.github/workflows/check.yml</strong> que roda <span class="ci">echo "Build OK"</span> em cada PR. Observe o ✓ aparecer nos PRs.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAINEL: DESAFIO FINAL
+══════════════════════════════ -->
+<div class="panel" id="panel-af">
+
+  <div class="challenge-hero">
+    <div class="ch-eyebrow">🏆 Desafio Final Integrador</div>
+    <div class="ch-title">Operação ODS: Novo Desenvolvedor</div>
+    <p class="ch-desc">
+      Você acabou de entrar como desenvolvedor voluntário no <strong>Projeto ODS da instituição</strong>. A equipe do 2º Ano já estruturou o repositório e o fluxo de trabalho. Sua missão é entregar uma funcionalidade real seguindo todos os processos profissionais aprendidos nas três aulas — do git init ao merge aprovado.
+    </p>
+    <div class="ch-meta">
+      <span class="ch-tag">⏱ ~90 minutos</span>
+      <span class="ch-tag">👥 Individual ou dupla</span>
+      <span class="ch-tag">🌿 Abrange as 3 aulas</span>
+      <span class="ch-tag">📋 Requer template de PR</span>
+    </div>
+  </div>
+
+  <!-- Contexto -->
+  <div class="ch-section">
+    <div class="ch-section-title">📋 Contexto e Objetivo</div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:24px 28px;">
+      <p style="font-size:15px;color:var(--mu);line-height:1.8;margin-bottom:16px;">
+        O projeto está desenvolvendo um <strong style="color:var(--tx);">dashboard para acompanhar o progresso das metas da ODS 11</strong> (Cidades e Comunidades Sustentáveis). Sua tarefa é implementar o componente <strong style="color:var(--tx);">CardMeta</strong> — um card visual que exibe uma meta individual com seu indicador de progresso.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <p style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--yw);margin-bottom:8px;">📁 Estrutura esperada:</p>
+          <div class="mini-term">
+            <div>projeto-ods/</div>
+            <div>├── index.html</div>
+            <div>├── styles.css</div>
+            <div>├── <span class="kw">components/</span></div>
+            <div>│   └── <span class="kw">CardMeta.html</span>  ← você cria</div>
+            <div>└── README.md</div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--yw);margin-bottom:8px;">📌 Requisitos mínimos do card:</p>
+          <div class="mini-term">
+            <div><span class="cm">- Título da meta</span></div>
+            <div><span class="cm">- Descrição breve</span></div>
+            <div><span class="cm">- Indicador visual de progresso (% ou barra)</span></div>
+            <div><span class="cm">- Responsivo (funciona em mobile)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Passo a passo -->
+  <div class="ch-section">
+    <div class="ch-section-title">🚀 Passo a Passo</div>
+    <div class="ch-steps">
+      <div class="ch-step">
+        <div class="ch-step-num">01</div>
+        <div>
+          <div class="ch-step-title">Clone o repositório</div>
+          <div class="ch-step-desc">Clone o repositório compartilhado da turma (ou use o seu <span class="ci">projeto-ods</span> como base). Confirme que o <span class="ci">git log --oneline</span> mostra o histórico correto.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">02</div>
+        <div>
+          <div class="ch-step-title">Crie a branch correta</div>
+          <div class="ch-step-desc">Use o padrão: <span class="ci">feature/SEU-NOME/card-meta-ods</span>. Confirme com <span class="ci">git branch</span> que está na branch certa antes de começar a codar.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">03</div>
+        <div>
+          <div class="ch-step-title">Implemente o CardMeta em 3 commits</div>
+          <div class="ch-step-desc">
+            Separe a implementação em exatamente 3 commits semânticos:<br>
+            <strong>Commit 1:</strong> <span class="ci">feat(card): cria estrutura HTML do CardMeta</span><br>
+            <strong>Commit 2:</strong> <span class="ci">style(card): adiciona estilos e barra de progresso</span><br>
+            <strong>Commit 3:</strong> <span class="ci">docs(card): documenta estrutura do componente</span>
+          </div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">04</div>
+        <div>
+          <div class="ch-step-title">Publique a branch</div>
+          <div class="ch-step-desc">Execute <span class="ci">git push -u origin feature/SEU-NOME/card-meta-ods</span> e confirme no GitHub que a branch aparece com os 3 commits.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">05</div>
+        <div>
+          <div class="ch-step-title">Abra o PR com título profissional</div>
+          <div class="ch-step-desc">Título: <span class="ci">feat(dashboard): adiciona componente CardMeta com indicador de progresso</span>. Adicione como base o branch <strong>main</strong>.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">06</div>
+        <div>
+          <div class="ch-step-title">Preencha o template completo</div>
+          <div class="ch-step-desc">Preencha <strong>todos os campos</strong> do template: descrição, checklist, issue relacionada, screenshot do card funcionando e notas para o revisor.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">07</div>
+        <div>
+          <div class="ch-step-title">Adicione revisor e aguarde feedback</div>
+          <div class="ch-step-desc">Adicione pelo menos <strong>1 colega como revisor</strong>. Não faça o merge antes de receber e responder ao feedback.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">08</div>
+        <div>
+          <div class="ch-step-title">Responda ao feedback e itere</div>
+          <div class="ch-step-desc">Para cada comentário recebido: faça a mudança localmente → <span class="ci">git commit -m "fix(card): aplica feedback do review"</span> → <span class="ci">git push</span> → responda o comentário no GitHub explicando o que fez.</div>
+        </div>
+      </div>
+      <div class="ch-step">
+        <div class="ch-step-num">09</div>
+        <div>
+          <div class="ch-step-title">Aguarde aprovação e merge</div>
+          <div class="ch-step-desc">Após a aprovação e o CI passar (se configurado), faça o merge. Delete a branch após o merge. Celebre! 🎉</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template de PR -->
+  <div class="ch-section">
+    <div class="ch-section-title">📝 Template de PR a preencher</div>
+    <div class="pr-template">
+      <div class="pth">## 🎯 Descrição</div>
+      <div class="ptc">&lt;!-- Descreva o que este PR implementa e por que é necessário --&gt;</div>
+      <div class="ptb">Implementa o componente CardMeta para o dashboard da ODS 11, exibindo...</div>
+      <br>
+      <div class="pth">## ✅ Checklist</div>
+      <div class="ptb">- [ ] Estrutura HTML semântica e acessível</div>
+      <div class="ptb">- [ ] Commits seguem o padrão Conventional Commits</div>
+      <div class="ptb">- [ ] Testei visualmente em desktop e mobile</div>
+      <div class="ptb">- [ ] Código não tem console.log ou código comentado desnecessário</div>
+      <div class="ptb">- [ ] README atualizado (se aplicável)</div>
+      <br>
+      <div class="pth">## 🔗 Issue relacionada</div>
+      <div class="ptb">Closes #<span class="ptl">[número da issue, se houver]</span></div>
+      <br>
+      <div class="pth">## 📸 Screenshot</div>
+      <div class="ptc">&lt;!-- Cole aqui uma imagem do card funcionando --&gt;</div>
+      <br>
+      <div class="pth">## 💬 Notas para o Revisor</div>
+      <div class="ptc">&lt;!-- Algo específico que o revisor deve checar? --&gt;</div>
+      <div class="ptb">Preste atenção na responsividade em telas menores que 400px...</div>
+    </div>
+  </div>
+
+  <!-- Critérios de avaliação -->
+  <div class="ch-section">
+    <div class="ch-section-title">📊 Critérios de Avaliação</div>
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="cc-icon">🔧</div>
+        <div class="cc-title">Git — Técnico</div>
+        <ul>
+          <li>Branch com nomenclatura correta</li>
+          <li>Exatamente 3 commits semânticos</li>
+          <li>Nenhum commit com mensagem genérica</li>
+          <li>Push na branch certa, não no main</li>
+        </ul>
+      </div>
+      <div class="crit-card">
+        <div class="cc-icon">🌐</div>
+        <div class="cc-title">GitHub — Processo</div>
+        <ul>
+          <li>Título de PR no padrão Conventional</li>
+          <li>Template completamente preenchido</li>
+          <li>Screenshot incluída</li>
+          <li>Revisor adicionado corretamente</li>
+        </ul>
+      </div>
+      <div class="crit-card">
+        <div class="cc-icon">🤝</div>
+        <div class="cc-title">Colaboração</div>
+        <ul>
+          <li>Respondeu a todos os comentários</li>
+          <li>Feedback incorporado com novos commits</li>
+          <li>Conversas do review marcadas como resolvidas</li>
+          <li>Merge apenas após aprovação</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dicas finais -->
+  <div class="ch-section">
+    <div class="ch-section-title">💡 Dicas para o Sucesso</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="tip" style="margin-top:0;">
+        <div class="tip-label">🎯 Tamanho ideal de PR</div>
+        Um bom PR tem entre <strong>50–300 linhas</strong> alteradas. Se estiver muito grande, considere dividir em dois PRs menores.
+      </div>
+      <div class="tip" style="margin-top:0;">
+        <div class="tip-label">📝 Mensagem de commit no review</div>
+        Ao fazer ajustes do review, use: <span class="ci">fix(componente): aplica feedback — descrição do que mudou</span>
+      </div>
+      <div class="tip" style="margin-top:0;">
+        <div class="tip-label">🔄 Mantenha a branch atualizada</div>
+        Se demorar para o PR ser aprovado, execute <span class="ci">git pull origin main</span> na sua branch para pegar as atualizações antes do merge.
+      </div>
+      <div class="tip" style="margin-top:0;">
+        <div class="tip-label">📸 Screenshots fazem diferença</div>
+        Reviewers aprovam PRs visuais muito mais rápido quando há <strong>antes/depois</strong> ou print funcionando. Tire um print e cole diretamente no campo de texto do GitHub.
+      </div>
+    </div>
+  </div>
+
+</div><!-- panel-af -->
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.tab.'+id).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  window.scrollTo({top:57,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
