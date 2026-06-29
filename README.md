@@ -30,7 +30,7 @@ Capacitar os alunos do 1º ano a colaborar profissionalmente usando Git e GitHub
 | 01 | Controlando o Tempo do Seu Código | `git add`, `git commit`, Commits Semânticos, `git reset` |
 | 02 | Branches: Desenvolvendo em Paralelo | `git branch`, `git switch`, `git merge`, conflitos |
 | 03 | GitHub: Colaboração Profissional | `git remote`, `push/pull`, Pull Requests, GitHub Actions |
-| 04 | Org GitHub do Projeto ODS *(em breve)* | Fluxo da organização, templates de PR, documentação |
+| 04 | Org GitHub do Projeto ODS | Fluxo da organização, templates de PR, documentação |
 
 Cada aula tem duração de **30 minutos** e o arquivo de exercícios cobre os três níveis: Fácil, Médio e Difícil.
 
