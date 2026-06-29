@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Aula 04 — A Org Delta: Contribuindo de Verdade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1117;--sf:#161B22;--sf2:#21262D;--bd:#30363D;--tx:#E6EDF3;--mu:#8B949E;
+  --ac:#F0883E;--gr:#3FB950;--bl:#58A6FF;--pu:#BC8CFF;--yw:#D29922;--rd:#F85149;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;}
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--ac);transition:width .4s ease;z-index:200;}
+#back{position:fixed;top:18px;left:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--mu);text-decoration:none;padding:6px 12px;border-radius:6px;transition:.2s;border:1px solid transparent;}
+#back:hover{color:var(--tx);background:var(--sf2);border-color:var(--bd);}
+#badge{position:fixed;top:18px;right:24px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--ac);background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:5px 12px;}
+#deck{width:100%;height:100%;position:relative;}
+.s{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:64px 80px 88px;}
+.s.on{display:flex;animation:fi .35s ease;}
+@keyframes fi{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+.s.back{animation:fb .35s ease;}
+#nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;z-index:200;}
+.nb{width:40px;height:40px;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);
+  color:var(--tx);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.nb:hover:not(:disabled){background:var(--bd);border-color:var(--ac);}
+.nb:disabled{opacity:.3;cursor:default;}
+#ctr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);min-width:52px;text-align:center;}
+.kbhint{position:fixed;bottom:28px;right:28px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mu);opacity:.45;}
+kbd{background:var(--sf2);border:1px solid var(--bd);border-radius:3px;padding:1px 5px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);margin-bottom:12px;}
+h1.big{font-family:'JetBrains Mono',monospace;font-size:clamp(28px,4vw,50px);font-weight:700;line-height:1.15;margin-bottom:20px;}
+h1.big .ac{color:var(--ac);}
+h2.sh{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,2.6vw,32px);font-weight:700;margin-bottom:24px;}
+h2.sh .ac{color:var(--ac);}h2.sh .gr{color:var(--gr);}h2.sh .bl{color:var(--bl);}h2.sh .pu{color:var(--pu);}
+.content{flex-direction:column;align-items:flex-start;width:100%;max-width:900px;}
+.wide{max-width:1080px;}
+.subtitle{font-size:16px;color:var(--mu);max-width:560px;line-height:1.7;margin-bottom:28px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:32px;width:100%;align-items:start;}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;width:100%;align-items:start;}
+.lead{font-size:14px;color:var(--mu);line-height:1.7;margin-bottom:16px;}
+.lead strong{color:var(--tx);}
+.ci{font-family:'JetBrains Mono',monospace;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:1px 6px;font-size:.85em;color:var(--ac);}
+ul.pts{list-style:none;display:flex;flex-direction:column;gap:10px;}
+ul.pts li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.6;color:var(--mu);}
+ul.pts li::before{content:'▸';color:var(--ac);font-size:11px;flex-shrink:0;margin-top:4px;}
+ul.pts li strong{color:var(--tx);}
+.term{background:#010409;border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:12px;width:100%;}
+.th{background:var(--sf2);padding:9px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bd);}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#FF5F57;}.dy{background:#FEBC2E;}.dg{background:#28C840;}
+.tt{margin-left:6px;font-size:11px;color:var(--mu);}
+.tb2{padding:14px 18px;display:flex;flex-direction:column;gap:7px;}
+.tl{display:flex;align-items:flex-start;gap:8px;}
+.pr2{color:var(--gr);user-select:none;flex-shrink:0;}
+.kw{color:var(--ac);}.fl{color:var(--bl);}.st{color:var(--yw);}
+.out{color:var(--mu);margin-left:18px;font-size:11px;}
+.out.ok{color:var(--gr);}.out.bl{color:var(--bl);}.out.pu{color:var(--pu);}
+.tsep{height:1px;background:var(--bd);margin:3px 0;}
+.tc2{color:var(--mu);font-size:11px;}
+.ib{border-radius:8px;padding:14px 16px;margin-top:12px;}
+.ib .ibl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.ib p{font-size:13px;color:var(--mu);line-height:1.6;}
+.ib p strong{color:var(--tx);}
+.ib-or{background:rgba(240,136,62,.08);border:1px solid rgba(240,136,62,.3);}
+.ib-or .ibl{color:var(--ac);}
+.ib-bl{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.3);}
+.ib-bl .ibl{color:var(--bl);}
+.ib-gr{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);}
+.ib-gr .ibl{color:var(--gr);}
+.ib-yw{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);}
+.ib-yw .ibl{color:var(--yw);}
+.ib-rd{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);}
+.ib-rd .ibl{color:var(--rd);}
+.ib-pu{background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.3);}
+.ib-pu .ibl{color:var(--pu);}
+.hero-slide{flex-direction:column;align-items:flex-start;padding-left:10%;}
+.alabel{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.alabel::before{content:'';width:20px;height:1px;background:var(--ac);}
+.tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);
+  background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:3px 8px;}
+.tree-bg{position:absolute;right:5%;top:50%;transform:translateY(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu);
+  line-height:1.9;opacity:.3;pointer-events:none;user-select:none;}
+.tree-bg .tg{color:rgba(63,185,80,.6);}.tree-bg .tb{color:rgba(88,166,255,.5);}.tree-bg .to{color:rgba(240,136,62,.6);}
+
+/* ── Org structure ── */
+.org-tree{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:2;
+  background:#010409;border:1px solid var(--bd);border-radius:10px;padding:18px 22px;width:100%;}
+.otg{color:var(--ac);}.otb{color:var(--bl);}.otp{color:var(--pu);}.otm{color:var(--mu);}
+.otgr{color:var(--gr);}
+
+/* ── Handbook dir ── */
+.hb-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;margin-top:14px;}
+.hb-card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:14px 12px;text-align:center;}
+.hb-card .hbi{font-size:22px;margin-bottom:7px;}
+.hb-card .hbn{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ac);margin-bottom:6px;}
+.hb-card .hbd{font-size:11px;color:var(--mu);line-height:1.4;}
+
+/* ── PR template mock ── */
+.pr-doc{background:#010409;border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:12px;width:100%;}
+.pr-doc-header{background:var(--sf2);padding:9px 16px;border-bottom:1px solid var(--bd);font-size:11px;color:var(--mu);}
+.pr-doc-body{padding:14px 18px;line-height:1.9;}
+.pdh{color:var(--yw);font-size:13px;font-weight:700;}
+.pdc{color:var(--mu);font-style:italic;font-size:11px;}
+.pdb{color:var(--tx);}
+.pdc2{color:var(--bl);}
+.pdok{color:var(--gr);}
+.pdrd{color:var(--rd);}
+
+/* ── Checklist items ── */
+.cl-list{display:flex;flex-direction:column;gap:7px;width:100%;margin-top:8px;}
+.cl-item{display:flex;align-items:flex-start;gap:10px;background:var(--sf);border:1px solid var(--bd);
+  border-radius:6px;padding:9px 12px;font-size:13px;}
+.cl-box{width:14px;height:14px;border:1px solid var(--bd);border-radius:3px;flex-shrink:0;
+  margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.cl-box.checked{background:rgba(63,185,80,.2);border-color:var(--gr);color:var(--gr);}
+.cl-item .clt{color:var(--mu);line-height:1.4;}
+.cl-item .clt strong{color:var(--tx);}
+.cl-item .clbadge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:3px;flex-shrink:0;margin-top:2px;}
+.year1{background:rgba(88,166,255,.15);color:var(--bl);}
+.year2{background:rgba(188,140,255,.15);color:var(--pu);}
+.both{background:rgba(63,185,80,.15);color:var(--gr);}
+
+/* ── Module badges grid ── */
+.mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:12px;}
+.mod-col{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:14px;}
+.mod-col .mc-header{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--bd);}
+.mc-header.y1{color:var(--bl);}.mc-header.y2{color:var(--pu);}
+.mod-list{display:flex;flex-direction:column;gap:6px;}
+.mod-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu);}
+.mod-item .mi{font-size:14px;}
+.mod-item strong{color:var(--tx);}
+
+/* ── Workflow diagram ── */
+.flow{display:flex;flex-direction:column;gap:6px;width:100%;margin-top:10px;}
+.flow-step{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;
+  background:var(--sf);border:1px solid var(--bd);border-radius:7px;padding:10px 14px;}
+.flow-step .fn{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ac);}
+.flow-step .ft{font-size:13px;color:var(--mu);}.flow-step .ft strong{color:var(--tx);}
+.flow-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:3px;white-space:nowrap;}
+.fb-auto{background:rgba(210,153,34,.15);color:var(--yw);}
+.fb-human{background:rgba(88,166,255,.15);color:var(--bl);}
+.fb-block{background:rgba(248,81,73,.15);color:var(--rd);}
+.fb-ok{background:rgba(63,185,80,.15);color:var(--gr);}
+
+/* ── YAML ── */
+.yaml{background:#010409;border:1px solid var(--bd);border-radius:10px;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;width:100%;}
+.yk{color:var(--bl);}.yv{color:var(--yw);}.yc{color:var(--mu);font-style:italic;}.ys{color:var(--gr);}
+
+/* ── Summary grid ── */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-top:12px;}
+.sc2{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:15px;}
+.sc2 .sn2{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ac);margin-bottom:7px;}
+.sc2 .sm{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--tx);margin-bottom:5px;}
+.sc2 .sd2{font-size:12px;color:var(--mu);line-height:1.4;}
+
+/* ── Recap ── */
+.recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-top:10px;}
+.recap-card{background:var(--sf);border:1px solid var(--bd);border-radius:7px;padding:12px;}
+.recap-card .rc{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);margin-bottom:4px;}
+.recap-card .rd{font-size:12px;color:var(--mu);}
+
+/* ── Warning ── */
+.warn{display:flex;gap:14px;background:rgba(248,81,73,.06);border:1px solid rgba(248,81,73,.3);
+  border-radius:8px;padding:14px 16px;margin-top:12px;align-items:flex-start;}
+.warn .wi{font-size:20px;flex-shrink:0;}
+.warn .wt{font-size:13px;color:var(--mu);line-height:1.5;}
+.warn .wt strong{color:var(--tx);}
+
+/* ── Naming rules ── */
+.naming-ex{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.ne{display:flex;align-items:center;gap:12px;}
+.ne .nl{font-family:'JetBrains Mono',monospace;font-size:12px;}
+.ne .nl.ok{color:var(--gr);}.ne .nl.no{color:var(--rd);}
+.ne .nd{font-size:12px;color:var(--mu);}
+</style>
+</head>
+<body>
+<a href="index.html" id="back">← Menu</a>
+<div id="badge">🏢 Aula 04 / 04</div>
+<div id="progress"></div>
+<div id="deck">
+
+<!-- ── SLIDE 1: Título ── -->
+<div class="s on hero-slide" id="s1">
+  <div class="alabel">Aula 04 · Git &amp; GitHub Profissional</div>
+  <h1 class="big">A Org <span class="ac">Delta</span>:<br>Contribuindo<br>de Verdade</h1>
+  <p class="subtitle">Como o 2º ano organizou o repositório, o template de PR da organização e as regras que todo contribuidor precisa seguir.</p>
+  <div class="tags">
+    <span class="tag">⏱ 30 min</span>
+    <span class="tag">delta-app-ofc</span>
+    <span class="tag">delta-handbook</span>
+    <span class="tag">PR template</span>
+    <span class="tag">Actions</span>
+  </div>
+  <div class="tree-bg">
+    <div><span class="tg">✓</span> PR #14 merged · feat(api): endpoint ODS</div>
+    <div><span class="tg">✓</span> PR #13 merged · docs: atualiza handbook</div>
+    <div><span class="to">⊙</span> PR #15 open · feat(frontend): card meta</div>
+    <div><span class="tb">  ✓ conventional-commits · ✗ checklist</span></div>
+    <div></div>
+    <div><span class="tg">*</span> a1b2c3d <span class="tb">(HEAD → main)</span></div>
+    <div><span class="tg">*</span> 8d2e104 feat(auth): login JWT</div>
+    <div><span class="tg">|\</span></div>
+    <div><span class="tg">|</span> <span class="to">*</span> 5a7b3c9 fix: valida token</div>
+  </div>
+</div>
+
+<!-- ── SLIDE 2: Recap 3 aulas ── -->
+<div class="s" id="s2">
+  <div class="content wide">
+    <div class="eyebrow">Recap rápido — o que você já domina</div>
+    <h2 class="sh">A jornada até <span class="ac">aqui</span></h2>
+    <div class="recap-grid">
+      <div class="recap-card"><div class="rc">git add / commit</div><div class="rd">Checkpoints semânticos no histórico local</div></div>
+      <div class="recap-card"><div class="rc">git reset</div><div class="rd">Desfazer com --soft, --mixed, --hard</div></div>
+      <div class="recap-card"><div class="rc">git branch / switch</div><div class="rd">Linhas do tempo independentes por feature</div></div>
+      <div class="recap-card"><div class="rc">git merge</div><div class="rd">Integrar branches, resolver conflitos</div></div>
+      <div class="recap-card"><div class="rc">git push / pull</div><div class="rd">Sincronizar local com remoto (GitHub)</div></div>
+      <div class="recap-card"><div class="rc">Pull Requests</div><div class="rd">Review, aprovação e CI antes do merge</div></div>
+    </div>
+    <div class="ib ib-or">
+      <div class="ibl">🎯 Hoje: do treino para o jogo real</div>
+      <p>Nas últimas aulas praticamos os conceitos em repositórios próprios. Agora vamos conhecer o ambiente <strong>real do projeto</strong>: a organização <strong>delta-app-ofc</strong>, suas regras e como o 2º ano estruturou tudo para a colaboração funcionar.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 3: A organização Delta ── -->
+<div class="s" id="s3">
+  <div class="content wide">
+    <div class="eyebrow">delta-app-ofc</div>
+    <h2 class="sh">A organização <span class="ac">Delta</span> no GitHub</h2>
+    <div class="two">
+      <div>
+        <p class="lead">Uma <strong>GitHub Organization</strong> é como uma "empresa" no GitHub — agrupa múltiplos repositórios com membros, permissões e regras de workflow compartilhados.</p>
+        <div class="org-tree">
+          <div><span class="otg">delta-app-ofc</span> (organização)</div>
+          <div>├── <span class="otb">.github</span> <span class="otm">← regras globais da org</span></div>
+          <div>│&nbsp;&nbsp; ├── <span class="otm">workflows/</span></div>
+          <div>│&nbsp;&nbsp; ├── <span class="otm">scripts/</span></div>
+          <div>│&nbsp;&nbsp; ├── <span class="otm">profile/</span></div>
+          <div>│&nbsp;&nbsp; └── <span class="otm">pull_request_template.md</span></div>
+          <div>├── <span class="otp">delta-handbook</span> <span class="otm">← documentação técnica</span></div>
+          <div>│&nbsp;&nbsp; ├── <span class="otm">DADOS/ DEVOPS/ EQS/</span></div>
+          <div>│&nbsp;&nbsp; └── <span class="otm">GERAL/ UX/</span></div>
+          <div>└── <span class="otgr">outros repos do projeto...</span></div>
+        </div>
+      </div>
+      <div>
+        <ul class="pts">
+          <li>O repositório <span class="ci">.github</span> é <strong>especial</strong>: qualquer arquivo colocado nele (workflows, templates) vale para <strong>todos os repos da org</strong> automaticamente.</li>
+          <li>O <span class="ci">pull_request_template.md</span> na raiz do <span class="ci">.github</span> aparece <strong>pré-preenchido automaticamente</strong> sempre que alguém abre um PR.</li>
+          <li>Workflows definidos em <span class="ci">.github/workflows/</span> podem ser reaproveitados entre repositórios.</li>
+        </ul>
+        <div class="ib ib-bl">
+          <div class="ibl">🌐 GitHub Organizations</div>
+          <p>Além de repositórios, orgs têm <strong>Teams</strong> (grupos de membros), <strong>Projects</strong> (kanban), <strong>Branch Protection Rules</strong> e políticas de segurança centralizadas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 4: Delta Handbook ── -->
+<div class="s" id="s4">
+  <div class="content wide">
+    <div class="eyebrow">delta-handbook</div>
+    <h2 class="sh">O repositório de <span class="ac">documentação</span></h2>
+    <p class="lead">O <strong>delta-handbook</strong> é o repositório central de conhecimento do projeto — toda documentação técnica, arquitetura, processos e padrões vivem aqui, em Markdown.</p>
+    <div class="hb-grid">
+      <div class="hb-card">
+        <div class="hbi">🗄️</div>
+        <div class="hbn">DADOS</div>
+        <div class="hbd">Banco de dados, modelos relacionais, scripts SQL, engenharia de dados</div>
+      </div>
+      <div class="hb-card">
+        <div class="hbi">⚙️</div>
+        <div class="hbn">DEVOPS</div>
+        <div class="hbd">Infraestrutura, CI/CD, pipelines, ambientes e deploy</div>
+      </div>
+      <div class="hb-card">
+        <div class="hbi">📐</div>
+        <div class="hbn">EQS</div>
+        <div class="hbd">Engenharia de Software: arquitetura, RFs, RNFs, diagramas</div>
+      </div>
+      <div class="hb-card">
+        <div class="hbi">📋</div>
+        <div class="hbn">GERAL</div>
+        <div class="hbd">Processos, padrões gerais e decisões transversais do time</div>
+      </div>
+      <div class="hb-card">
+        <div class="hbi">🎨</div>
+        <div class="hbn">UX</div>
+        <div class="hbd">UX Research, jornadas do usuário, protótipos e design system</div>
+      </div>
+    </div>
+    <div class="two" style="margin-top:16px;">
+      <div class="ib ib-or" style="margin-top:0;">
+        <div class="ibl">✒️ Padrão de nomeação</div>
+        <p>Arquivos em <strong>kebab-case minúsculo</strong>:<br>
+        <span class="ci">api-autenticacao.md</span> ✅<br>
+        <span class="ci">modelo-relacional.md</span> ✅<br>
+        <span style="color:var(--rd);font-family:'JetBrains Mono',monospace;font-size:12px;">API_Autenticacao.md</span> ❌</p>
+      </div>
+      <div class="ib ib-gr" style="margin-top:0;">
+        <div class="ibl">📝 Todo doc deve ter</div>
+        <p>Título e objetivo claros · Contexto e justificativas · Diagramas quando necessário · Histórico de atualizações relevantes · Escrito em <strong>Markdown (.md)</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 5: O Template de PR ── -->
+<div class="s" id="s5">
+  <div class="content wide">
+    <div class="eyebrow">pull_request_template.md</div>
+    <h2 class="sh">O template de PR da <span class="ac">organização</span></h2>
+    <p class="lead">Todo PR aberto em qualquer repositório da Delta já vem com esse template preenchido automaticamente. <strong>Nenhum campo é opcional.</strong></p>
+    <div class="two">
+      <div class="pr-doc">
+        <div class="pr-doc-header">📋 pull_request_template.md · delta-app-ofc</div>
+        <div class="pr-doc-body">
+          <div class="pdh"># PULL REQUEST - DELTA</div>
+          <br>
+          <div class="pdh">## 📄 Descrição</div>
+          <div class="pdc">&gt; Descreva o que foi implementado.</div>
+          <div class="pdc">&gt; 2° ANO: registre o RF atendido.</div>
+          <br>
+          <div class="pdh">## ✨ Tipo de PR</div>
+          <div class="pdb">- [ ] feat · fix · refactor · docs · test</div>
+          <br>
+          <div class="pdh">## 💻 Módulos Impactados — 1° ANO</div>
+          <div class="pdb">- [ ] Backend (Java / Servlets / DAO)</div>
+          <div class="pdb">- [ ] Frontend (HTML / CSS / Landing Page)</div>
+          <div class="pdb">- [ ] Database (Modelo Lógico / Script SQL)</div>
+          <br>
+          <div class="pdh">## 💻 Módulos Impactados — 2° ANO</div>
+          <div class="pdb">- [ ] API REST · React/TS · Mobile</div>
+          <div class="pdb">- [ ] IA Multiagente · BD · Infra/CI-CD · Docs</div>
+          <br>
+          <div class="pdh">## 🤖 Uso de IA</div>
+          <div class="pdb">- [ ] Tive auxílio de IA</div>
+          <div class="pdb">- [ ] 100% feito pelos integrantes</div>
+          <br>
+          <div class="pdh">## ✅ Checklist de Rigor Técnico</div>
+          <div class="pdb">- [ ] Commits seguem Conventional Commits</div>
+          <div class="pdc">...e mais 9 itens</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--ac);margin-bottom:10px;">Seções do template:</p>
+        <ul class="pts">
+          <li><strong>Descrição:</strong> o que foi implementado — 2º ano referencia o RF do doc de EQS</li>
+          <li><strong>Tipo de PR:</strong> checkbox com os tipos Conventional Commits</li>
+          <li><strong>Módulos 1º Ano:</strong> Backend Java / Frontend HTML / Database SQL</li>
+          <li><strong>Módulos 2º Ano:</strong> Spring Boot, React/TS, Mobile, IA, BD, Infra, Docs/UX</li>
+          <li><strong>Uso de IA:</strong> transparência obrigatória — se usou, documenta no Memorial</li>
+          <li><strong>Padrões e Testes:</strong> Design Patterns e TDD utilizados</li>
+          <li><strong>Checklist Técnico:</strong> 10 critérios de qualidade a marcar</li>
+        </ul>
+        <div class="ib ib-or">
+          <div class="ibl">⚠️ PR incompleto = bloqueado</div>
+          <p>Um Action da organização pode verificar automaticamente se o checklist está preenchido antes de permitir o merge.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 6: Módulos por ano ── -->
+<div class="s" id="s6">
+  <div class="content wide">
+    <div class="eyebrow">Template · Módulos Impactados</div>
+    <h2 class="sh">Marque <span class="ac">o que você tocou</span></h2>
+    <p class="lead">No template, você marca <strong>todos</strong> os módulos que o seu PR altera — não só o principal. Se mexeu em dois lugares, marque dois.</p>
+    <div class="mod-grid">
+      <div class="mod-col">
+        <div class="mc-header y1">💻 1º ANO — Seus módulos</div>
+        <div class="mod-list">
+          <div class="mod-item"><span class="mi">☕</span><div><strong>Backend</strong> · Java / Servlets / DAO</div></div>
+          <div class="mod-item"><span class="mi">🌐</span><div><strong>Frontend</strong> · HTML / CSS / Landing Page</div></div>
+          <div class="mod-item"><span class="mi">🗄️</span><div><strong>Database</strong> · Modelo Lógico / Script SQL</div></div>
+          <div class="mod-item"><span class="mi">📊</span><div><strong>Planilha de Controle</strong> / SO</div></div>
+        </div>
+      </div>
+      <div class="mod-col">
+        <div class="mc-header y2">🚀 2º ANO — Para referência</div>
+        <div class="mod-list">
+          <div class="mod-item"><span class="mi">🌿</span><div><strong>API REST</strong> · Spring Boot</div></div>
+          <div class="mod-item"><span class="mi">⚛️</span><div><strong>Aplicação Dinâmica</strong> · React / TypeScript</div></div>
+          <div class="mod-item"><span class="mi">📱</span><div><strong>Mobile</strong> · Android / iOS / Firebase</div></div>
+          <div class="mod-item"><span class="mi">🤖</span><div><strong>IA Multiagente</strong> · FastAPI / Langgraph</div></div>
+          <div class="mod-item"><span class="mi">🗄️</span><div><strong>Banco de Dados</strong> · Postgres / MongoDB / Redis / Neo4J</div></div>
+          <div class="mod-item"><span class="mi">⚙️</span><div><strong>Infraestrutura / CI-CD</strong></div></div>
+          <div class="mod-item"><span class="mi">📋</span><div><strong>Gestão / Docs / UX</strong></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ib ib-bl">
+      <div class="ibl">💡 Por que marcar os módulos?</div>
+      <p>Ajuda o revisor a entender o <strong>escopo do impacto</strong> e a chamar as pessoas certas. Um PR que toca DB e Backend precisa de revisores com conhecimento das duas áreas.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 7: Uso de IA e Memorial ── -->
+<div class="s" id="s7">
+  <div class="content">
+    <div class="eyebrow">Template · Transparência</div>
+    <h2 class="sh">Declaração de <span class="ac">Uso de IA</span></h2>
+    <div class="two">
+      <div>
+        <p class="lead">O template exige que você declare se usou IA para gerar ou ajudar no código deste PR:</p>
+        <div class="pr-doc">
+          <div class="pr-doc-header">🤖 Uso de Inteligência Artificial</div>
+          <div class="pr-doc-body">
+            <div class="pdb">- [ ] Este código teve auxílio de IA.</div>
+            <div class="pdb">- [ ] Este código foi feito 100% pelos integrantes.</div>
+            <br>
+            <div class="pdc">&gt; 1° ANO: Caso tenha usado IA,</div>
+            <div class="pdc">&gt; lembre-se de registrar o prompt e</div>
+            <div class="pdc">&gt; a validação crítica no Memorial Descritivo!</div>
+          </div>
+        </div>
+        <div class="ib ib-or" style="margin-top:12px;">
+          <div class="ibl">📝 O que é o Memorial Descritivo?</div>
+          <p>É um documento do 1º ano onde vocês registram o <strong>processo de desenvolvimento</strong>: decisões tomadas, ferramentas usadas, prompts de IA e como validaram criticamente o resultado.</p>
+        </div>
+      </div>
+      <div>
+        <p class="lead">Por que isso existe?</p>
+        <ul class="pts">
+          <li><strong>Honestidade intelectual:</strong> a equipe sabe o que foi gerado por IA e o que foi escrito pela turma</li>
+          <li><strong>Responsabilidade técnica:</strong> IA gera código incorreto com frequência — você é responsável por validar tudo que commita</li>
+          <li><strong>Aprendizado real:</strong> copiar sem entender não te prepara para o mercado de trabalho</li>
+          <li><strong>Documentação do processo:</strong> o Memorial serve como portfólio de decisões do projeto</li>
+        </ul>
+        <div class="ib ib-yw">
+          <div class="ibl">⚠️ IA não é proibida</div>
+          <p>IA é uma <strong>ferramenta</strong>, não um atalho. Use-a, mas entenda o código gerado, teste-o, adapte-o ao projeto e <strong>declare no template</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 8: Checklist de Rigor Técnico ── -->
+<div class="s" id="s8">
+  <div class="content wide">
+    <div class="eyebrow">Template · Checklist de Rigor Técnico</div>
+    <h2 class="sh">Os 10 critérios que seu PR <span class="ac">precisa passar</span></h2>
+    <div class="cl-list">
+      <div class="cl-item">
+        <div class="cl-box">✓</div>
+        <span class="clbadge both">Todos</span>
+        <div class="clt">Commits deste branch seguem estritamente o padrão <strong>Conventional Commits</strong></div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box"></div>
+        <span class="clbadge year2">2º Ano</span>
+        <div class="clt">No frontend React/TS, <strong>não foi usado o tipo <code style="color:var(--rd);">any</code></strong> e os serviços estão isolados em camadas</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box"></div>
+        <span class="clbadge year2">2º Ano</span>
+        <div class="clt">Interface atende <strong>WCAG 2.1 AA</strong>: foco visível, labels em inputs, operável por teclado</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box">✓</div>
+        <span class="clbadge both">Todos</span>
+        <div class="clt">Variáveis de ambiente (<strong>.env</strong>) configuradas e <strong>não versionadas</strong> (estão no .gitignore)</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box"></div>
+        <span class="clbadge year2">2º Ano</span>
+        <div class="clt">Tratamento de exceções <strong>centralizado</strong> e validações de API implementadas</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box"></div>
+        <span class="clbadge year2">2º Ano</span>
+        <div class="clt">Novos endpoints → documentação do <strong>Swagger atualizada</strong></div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box"></div>
+        <span class="clbadge both">Todos</span>
+        <div class="clt">Há tratamento de exceções <strong>try/catch</strong> onde necessário; dados de entrada têm <strong>validação adequada</strong></div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box"></div>
+        <span class="clbadge year1">1º Ano</span>
+        <div class="clt">Se houver SQL, foram usados <strong>DEFAULT e CHECKs</strong> conforme a demanda</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-box">✓</div>
+        <span class="clbadge both">Todos</span>
+        <div class="clt">O código foi <strong>testado localmente</strong> e não causa novos bugs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 9: Conventional Commits na org ── -->
+<div class="s" id="s9">
+  <div class="content">
+    <div class="eyebrow">Commits na Org Delta</div>
+    <h2 class="sh">Conventional Commits: <span class="ac">sua prioridade #1</span></h2>
+    <p class="lead">O checklist técnico coloca Conventional Commits como <strong>primeiro item</strong> — é o requisito mais básico. PR com commit ruim não passa de review.</p>
+    <div class="two">
+      <div>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">Commits válidos na Delta</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr2">✓</span><span style="color:var(--gr);font-size:12px;">feat: adiciona card de meta ODS</span></div>
+            <div class="tl"><span class="pr2">✓</span><span style="color:var(--gr);font-size:12px;">fix: corrige constraint NOT NULL na tabela metas</span></div>
+            <div class="tl"><span class="pr2">✓</span><span style="color:var(--gr);font-size:12px;">docs: atualiza RF-05 no handbook</span></div>
+            <div class="tl"><span class="pr2">✓</span><span style="color:var(--gr);font-size:12px;">refactor: extrai DAO para camada separada</span></div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr2">✗</span><span style="color:var(--rd);font-size:12px;">atualizações</span></div>
+            <div class="tl"><span class="pr2">✗</span><span style="color:var(--rd);font-size:12px;">corrige bug</span></div>
+            <div class="tl"><span class="pr2">✗</span><span style="color:var(--rd);font-size:12px;">WIP</span></div>
+            <div class="tl"><span class="pr2">✗</span><span style="color:var(--rd);font-size:12px;">Adiciona Funcionalidade Nova</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="lead">Regras específicas da Delta:</p>
+        <ul class="pts">
+          <li>Descrição <strong>em minúsculas</strong>, sem ponto final, no imperativo</li>
+          <li><strong>Mínimo 1 commit por lógica concluída</strong> — não commite código quebrado</li>
+          <li>Se um Action de CI detectar commits fora do padrão, o PR pode ser <strong>bloqueado automaticamente</strong></li>
+        </ul>
+        <div class="ib ib-or">
+          <div class="ibl">🤖 Lint de commits automático</div>
+          <p>Alguns repos usam o <strong>commitlint</strong> via GitHub Actions para rejeitar automaticamente commits fora do padrão Conventional. Você vê isso no status ✓/✗ do PR.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 10: GitHub Actions na org ── -->
+<div class="s" id="s10">
+  <div class="content wide">
+    <div class="eyebrow">GitHub Actions · Automação</div>
+    <h2 class="sh">O que acontece automaticamente <span class="ac">quando você abre um PR</span></h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="fn">01</div>
+        <div class="ft"><strong>Push da feature branch</strong> → PR aberto no GitHub</div>
+        <span class="flow-badge fb-human">👤 você</span>
+      </div>
+      <div class="flow-step">
+        <div class="fn">02</div>
+        <div class="ft"><strong>Conventional Commits Check</strong> — Action verifica se todos os commits do PR seguem o padrão</div>
+        <span class="flow-badge fb-auto">⚡ automático</span>
+      </div>
+      <div class="flow-step">
+        <div class="fn">03</div>
+        <div class="ft"><strong>Build / Lint / Testes</strong> — Action faz install, lint e roda os testes automatizados do módulo</div>
+        <span class="flow-badge fb-auto">⚡ automático</span>
+      </div>
+      <div class="flow-step">
+        <div class="fn">04</div>
+        <div class="ft">Se algum check <strong>falhar</strong>, o PR fica bloqueado — você corrige e faz push novamente</div>
+        <span class="flow-badge fb-block">🔴 bloqueado</span>
+      </div>
+      <div class="flow-step">
+        <div class="fn">05</div>
+        <div class="ft"><strong>Code Review humano</strong> — pelo menos 1 membro revisa e aprova</div>
+        <span class="flow-badge fb-human">👤 membros</span>
+      </div>
+      <div class="flow-step">
+        <div class="fn">06</div>
+        <div class="ft">Todos os checks ✓ + aprovação → <strong>Merge liberado</strong></div>
+        <span class="flow-badge fb-ok">✓ merge</span>
+      </div>
+    </div>
+    <div class="ib ib-or" style="margin-top:12px;">
+      <div class="ibl">🔑 Branch Protection Rules</div>
+      <p>O main da org tem <strong>branch protection</strong> ativa: não é possível fazer push direto — 100% do código entra pelo fluxo de PR + review + CI. Nem os admins quebram essa regra.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 11: Um workflow real da org ── -->
+<div class="s" id="s11">
+  <div class="content">
+    <div class="eyebrow">Exemplo Real · .github/workflows</div>
+    <h2 class="sh">Anatomy de um <span class="ac">workflow da Delta</span></h2>
+    <div class="two">
+      <div>
+        <p class="lead" style="margin-bottom:10px;">Estrutura típica de um workflow de CI para PRs:</p>
+        <div class="yaml">
+          <div><span class="yc"># .github/workflows/pr-check.yml</span></div>
+          <div><span class="yk">name:</span> <span class="yv">PR Check · Delta</span></div>
+          <br>
+          <div><span class="yk">on:</span></div>
+          <div>&nbsp;&nbsp;<span class="yk">pull_request:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">branches:</span> <span class="yv">[ main ]</span></div>
+          <br>
+          <div><span class="yk">jobs:</span></div>
+          <div>&nbsp;&nbsp;<span class="yk">commit-lint:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">runs-on:</span> <span class="yv">ubuntu-latest</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">steps:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- uses:</span> <span class="yv">actions/checkout@v4</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">with:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">fetch-depth:</span> <span class="yv">0</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- name:</span> <span class="yv">Lint commits</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">uses:</span> <span class="yv">wagoid/commitlint-github-action@v5</span></div>
+          <br>
+          <div>&nbsp;&nbsp;<span class="yk">build-and-test:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">runs-on:</span> <span class="yv">ubuntu-latest</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">steps:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- uses:</span> <span class="yv">actions/checkout@v4</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">- name:</span> <span class="yv">Install &amp; Test</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yk">run:</span> <span class="ys">npm ci &amp;&amp; npm test</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="lead">Lendo o workflow:</p>
+        <ul class="pts">
+          <li><span class="ci">on: pull_request</span> → o workflow roda <strong>toda vez que um PR é aberto ou atualizado</strong> mirando o main</li>
+          <li><span class="ci">fetch-depth: 0</span> → baixa o histórico completo, necessário para o <strong>commitlint checar todos os commits do PR</strong></li>
+          <li><span class="ci">wagoid/commitlint-github-action</span> → Action da comunidade que verifica Conventional Commits automaticamente</li>
+          <li>Dois <strong>jobs paralelos</strong>: lint de commits + build/testes</li>
+          <li>Ambos precisam passar (✓) para o <strong>merge ser liberado</strong></li>
+        </ul>
+        <div class="ib ib-pu">
+          <div class="ibl">📁 Scripts da org</div>
+          <p>O repositório <span class="ci">.github</span> também tem uma pasta <span class="ci">scripts/</span> com automações em Python que apoiam os workflows — como validação de templates ou relatórios.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 12: Contribuindo na prática ── -->
+<div class="s" id="s12">
+  <div class="content">
+    <div class="eyebrow">Passo a Passo · Projeto Real</div>
+    <h2 class="sh">Como você vai <span class="ac">contribuir</span> no projeto Delta</h2>
+    <div class="two">
+      <div>
+        <div class="flow">
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">01</div>
+            <div class="ft"><strong>Clone o repo</strong> da org e configure o remote:<br><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);">git clone https://github.com/delta-app-ofc/REPO</span></div>
+          </div>
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">02</div>
+            <div class="ft"><strong>Crie sua branch</strong> com o padrão da org:<br><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);">git switch -c feature/descricao-curta</span></div>
+          </div>
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">03</div>
+            <div class="ft"><strong>Desenvolva</strong> com commits semânticos frequentes e pequenos</div>
+          </div>
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">04</div>
+            <div class="ft"><strong>Antes do PR</strong>: <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);">git pull origin main</span> para evitar conflitos grandes</div>
+          </div>
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">05</div>
+            <div class="ft"><strong>Push</strong> da branch e abra o PR:<br><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);">git push -u origin feature/descricao</span></div>
+          </div>
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">06</div>
+            <div class="ft"><strong>Preencha o template</strong> completamente — todos os campos</div>
+          </div>
+          <div class="flow-step" style="grid-template-columns:28px 1fr;">
+            <div class="fn">07</div>
+            <div class="ft"><strong>Aguarde CI</strong> e responda ao review dos membros</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="lead">Nomenclatura de branches na Delta:</p>
+        <div class="naming-ex">
+          <div class="ne"><span class="nl ok">feature/card-meta-ods</span></div>
+          <div class="ne"><div class="nd">↑ nova funcionalidade</div></div>
+          <div class="ne"><span class="nl ok">fix/calculo-indicador</span></div>
+          <div class="ne"><div class="nd">↑ correção de bug</div></div>
+          <div class="ne"><span class="nl ok">docs/guia-contribuicao</span></div>
+          <div class="ne"><div class="nd">↑ documentação</div></div>
+          <div class="ne"><span class="nl no">feature/Funcionalidade Nova</span></div>
+          <div class="ne"><div class="nd" style="color:var(--rd);">↑ inválido: maiúsculas e espaços</div></div>
+          <div class="ne"><span class="nl no">fix_bug</span></div>
+          <div class="ne"><div class="nd" style="color:var(--rd);">↑ inválido: sem prefixo, sublinhado</div></div>
+        </div>
+        <div class="warn">
+          <div class="wi">🚫</div>
+          <div class="wt">Nunca faça <strong>push direto no main</strong>. A branch protection bloqueia, mas a tentativa gera conflito e constrangimento. Sempre branch + PR.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 13: Delta Handbook — contribuindo ── -->
+<div class="s" id="s13">
+  <div class="content">
+    <div class="eyebrow">delta-handbook · Documentação</div>
+    <h2 class="sh">Como contribuir com o <span class="ac">Handbook</span></h2>
+    <div class="two">
+      <div>
+        <p class="lead">O handbook também segue o mesmo fluxo de PR. Ao adicionar ou atualizar documentação técnica:</p>
+        <div class="term">
+          <div class="th"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="tt">exemplo de contribuição ao handbook</span></div>
+          <div class="tb2">
+            <div class="tl"><span class="pr2">$</span><span class="kw">git</span> switch -c docs/modelo-bd-metas</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr2">#</span><span class="tc2"> cria o arquivo na pasta correta</span></div>
+            <div class="tl"><span class="pr2">$</span><span class="kw">touch</span> DADOS/modelo-bd-metas.md</div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr2">$</span><span class="kw">git</span> add DADOS/modelo-bd-metas.md</div>
+            <div class="tl"><span class="pr2">$</span><span class="kw">git</span> commit -m <span class="st">"docs: adiciona modelo BD das metas ODS"</span></div>
+            <div class="tsep"></div>
+            <div class="tl"><span class="pr2">$</span><span class="kw">git</span> push -u origin docs/modelo-bd-metas</div>
+            <div class="out ok"># Abre PR → preenche template → review → merge</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="lead">Antes de criar qualquer documento:</p>
+        <ul class="pts">
+          <li><strong>Verifique se já existe</strong> conteúdo semelhante no handbook — evite duplicatas</li>
+          <li>Escolha a <strong>pasta correta</strong>: DADOS, DEVOPS, EQS, GERAL ou UX</li>
+          <li>Use <strong>kebab-case minúsculo</strong> no nome do arquivo</li>
+          <li>Comece com <strong>título, objetivo e contexto claros</strong></li>
+          <li>Use <strong>diagramas</strong> (Mermaid, imagens) quando o texto não for suficiente</li>
+          <li>Documente <strong>decisões e justificativas</strong>, não só o resultado</li>
+        </ul>
+        <div class="ib ib-gr">
+          <div class="ibl">📐 Dica: Referências ao RF</div>
+          <p>Se seu documento está ligado a um <strong>Requisito Funcional (RF)</strong> do projeto, referencie-o claramente: <span class="ci">RF-05: Exibição de Indicadores</span>. Isso conecta código, docs e testes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 14: Resumo da aula e do curso ── -->
+<div class="s" id="s14">
+  <div class="content wide">
+    <div class="eyebrow">Resumo · Aula 04 e encerramento do curso</div>
+    <h2 class="sh">Você está <span class="ac">pronto</span> para contribuir</h2>
+    <div class="sgrid">
+      <div class="sc2">
+        <div class="sn2">Org Delta</div>
+        <div class="sm">delta-app-ofc</div>
+        <div class="sd2">Organização no GitHub com repos, teams, branch protection e workflows compartilhados.</div>
+      </div>
+      <div class="sc2">
+        <div class="sn2">Handbook</div>
+        <div class="sm">delta-handbook</div>
+        <div class="sd2">Docs técnicos em Markdown: DADOS / DEVOPS / EQS / GERAL / UX — kebab-case.</div>
+      </div>
+      <div class="sc2">
+        <div class="sn2">Template PR</div>
+        <div class="sm">7 seções obrigatórias</div>
+        <div class="sd2">Descrição · Tipo · Módulos · IA · Design Patterns · Checklist de 10 critérios.</div>
+      </div>
+      <div class="sc2">
+        <div class="sn2">CI Automático</div>
+        <div class="sm">GitHub Actions</div>
+        <div class="sd2">Commitlint + build/testes rodam automaticamente em todo PR antes do review humano.</div>
+      </div>
+      <div class="sc2">
+        <div class="sn2">Branch Rules</div>
+        <div class="sm">Sempre via PR</div>
+        <div class="sd2">Push direto no main bloqueado. Todo código passa por feature branch → PR → review → CI → merge.</div>
+      </div>
+      <div class="sc2">
+        <div class="sn2">Você agora sabe</div>
+        <div class="sm">O fluxo completo</div>
+        <div class="sd2">Clone → branch → commits semânticos → push → PR com template → CI → review → merge.</div>
+      </div>
+    </div>
+    <div class="ib ib-or" style="margin-top:16px;">
+      <div class="ibl">🚀 Fluxo completo do projeto Delta</div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;">
+        <span style="color:var(--ac);">git clone</span> →
+        <span style="color:var(--ac);">switch -c feature/desc</span> →
+        <span style="color:var(--ac);">commits semânticos</span> →
+        <span style="color:var(--ac);">push</span> →
+        <span style="color:var(--gr);">PR com template completo</span> →
+        <span style="color:var(--yw);">CI ✓ (commitlint + testes)</span> →
+        <span style="color:var(--bl);">review</span> →
+        <span style="color:var(--gr);">merge 🎉</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="nav">
+  <button class="nb" id="bp" onclick="go(-1)" disabled>←</button>
+  <span id="ctr">1 / 14</span>
+  <button class="nb" id="bn" onclick="go(1)">→</button>
+</div>
+<div class="kbhint"><kbd>←</kbd> <kbd>→</kbd></div>
+<script>
+const T=14; let cur=1;
+function go(d){
+  const n=cur+d; if(n<1||n>T)return;
+  const oe=document.getElementById('s'+cur), ne=document.getElementById('s'+n);
+  oe.classList.remove('on','back'); ne.classList.remove('back');
+  if(d<0) ne.classList.add('back');
+  ne.classList.add('on'); cur=n; up();
+}
+function up(){
+  document.getElementById('ctr').textContent=cur+' / '+T;
+  document.getElementById('bp').disabled=cur===1;
+  document.getElementById('bn').disabled=cur===T;
+  document.getElementById('progress').style.width=(cur/T*100)+'%';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+up();
+</script>
+</body>
+</html>
